@@ -44,3 +44,33 @@ export function useOpenProject() {
       api.openProject(id, withTool),
   })
 }
+
+export function useAddLocalProject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ path, name }: { path: string; name?: string }) =>
+      api.addLocalProject(path, name),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: KEY })
+    },
+  })
+}
+
+export function useAddGithubProject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (nameWithOwner: string) => api.addGithubProject(nameWithOwner),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: KEY })
+    },
+  })
+}
+
+export function useGithubRepos(enabled: boolean) {
+  return useQuery({
+    queryKey: ['github-repos'],
+    queryFn: api.listGithubRepos,
+    enabled,
+    staleTime: 60_000,
+  })
+}

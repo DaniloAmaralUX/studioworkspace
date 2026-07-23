@@ -25,6 +25,14 @@ export type ProjectPatch = Partial<
   Pick<Project, 'name' | 'status' | 'nextAction' | 'tags'>
 >
 
+export type GithubRepo = {
+  nameWithOwner: string
+  description: string | null
+  primaryLanguage: string | null
+  pushedAt: string | null
+  url: string
+}
+
 export const api = {
   health: () => req<{ ok: boolean }>('/health'),
   listProjects: () => req<Project[]>('/projects'),
@@ -41,6 +49,17 @@ export const api = {
       `/projects/${id}/open`,
       { method: 'POST', body: JSON.stringify({ with: withTool }) },
     ),
+  addLocalProject: (path: string, name?: string) =>
+    req<Project>('/projects/local', {
+      method: 'POST',
+      body: JSON.stringify({ path, name }),
+    }),
+  listGithubRepos: () => req<GithubRepo[]>('/github/repos'),
+  addGithubProject: (nameWithOwner: string) =>
+    req<Project>('/projects/github', {
+      method: 'POST',
+      body: JSON.stringify({ nameWithOwner }),
+    }),
 }
 
 export type { ProjectStatus }

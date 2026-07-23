@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Plus, Search, AlertTriangle } from 'lucide-react'
+import { Search, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProjectCard } from '@/components/ProjectCard'
 import { EmptyState } from '@/components/EmptyState'
+import { AddProjectDialog } from '@/components/AddProjectDialog'
 import { useProjects } from '@/hooks/useProjects'
 import type { Project } from '@/lib/types'
 
@@ -62,9 +63,7 @@ export function ProjectsScreen() {
               className="w-56 pl-8"
             />
           </div>
-          <Button disabled title="Adicionar projeto chega na R3">
-            <Plus /> Projeto
-          </Button>
+          <AddProjectDialog />
         </div>
       </header>
 

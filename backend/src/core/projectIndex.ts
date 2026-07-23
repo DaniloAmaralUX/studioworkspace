@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto'
+import path from 'node:path'
 import { PROJECTS_FILE } from '../config'
 import { readJson, writeJsonAtomic } from '../lib/atomicJson'
-import type { Project } from '../lib/types'
+import type { Project, ProjectSource, ProjectStatus } from '../lib/types'
 import { seedProjects } from './seed'
 
 let cache: Project[] | null = null
@@ -55,4 +57,50 @@ export async function removeProject(id: string): Promise<boolean> {
   if (next.length === list.length) return false
   await persist(next)
   return true
+}
+
+function sameSource(a: ProjectSource, b: ProjectSource): boolean {
+  if (a.kind === 'local' && b.kind === 'local') {
+    return path.resolve(a.path).toLowerCase() === path.resolve(b.path).toLowerCase()
+  }
+  if (a.kind === 'github' && b.kind === 'github') {
+    return a.nameWithOwner.toLowerCase() === b.nameWithOwner.toLowerCase()
+  }
+  return false
+}
+
+export async function findBySource(
+  source: ProjectSource,
+): Promise<Project | undefined> {
+  const list = await loadProjects()
+  return list.find((p) => sameSource(p.source, source))
+}
+
+export type NewProjectInput = {
+  name: string
+  source: ProjectSource
+  status?: ProjectStatus
+  tags?: string[]
+  stack?: string[]
+  nextAction?: string
+  lastActivityAt?: string
+}
+
+export async function addProject(input: NewProjectInput): Promise<Project> {
+  const list = await loadProjects()
+  const now = new Date().toISOString()
+  const project: Project = {
+    id: randomUUID(),
+    name: input.name,
+    source: input.source,
+    status: input.status ?? 'planning',
+    nextAction: input.nextAction,
+    tags: input.tags ?? [],
+    stack: input.stack ?? [],
+    lastActivityAt: input.lastActivityAt,
+    createdAt: now,
+    updatedAt: now,
+  }
+  await persist([...list, project])
+  return project
 }

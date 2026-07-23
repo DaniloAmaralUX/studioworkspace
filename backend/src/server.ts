@@ -4,6 +4,7 @@ import { HOST, PORT, FRONTEND_ORIGIN } from './config'
 import { healthRoutes } from './routes/health'
 import { projectRoutes } from './routes/projects'
 import { openRoutes } from './routes/open'
+import { githubRoutes } from './routes/github'
 
 const app = Fastify({ logger: true })
 
@@ -13,6 +14,7 @@ await app.register(cors, { origin: FRONTEND_ORIGIN })
 await app.register(healthRoutes)
 await app.register(projectRoutes)
 await app.register(openRoutes)
+await app.register(githubRoutes)
 
 try {
   await app.listen({ host: HOST, port: PORT })
