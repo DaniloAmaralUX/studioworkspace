@@ -1,21 +1,27 @@
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
 import type { ProjectStatus } from '@/lib/types'
 
-const MAP: Record<ProjectStatus, { label: string; dot: string }> = {
-  planning: { label: 'Planejando', dot: 'bg-sky-500' },
-  building: { label: 'Construindo', dot: 'bg-blue-500' },
-  review: { label: 'Revisão', dot: 'bg-amber-500' },
-  blocked: { label: 'Bloqueado', dot: 'bg-red-500' },
-  done: { label: 'Concluído', dot: 'bg-emerald-500' },
+const LABEL: Record<ProjectStatus, string> = {
+  planning: 'Planejando',
+  building: 'Construindo',
+  review: 'Em revisão',
+  blocked: 'Bloqueado',
+  done: 'Concluído',
 }
 
+/** Pílula de status com cor semântica (token --status-*), estilo Linear. */
 export function StatusBadge({ status }: { status: ProjectStatus }) {
-  const s = MAP[status]
+  const c = `var(--status-${status})`
   return (
-    <Badge className="shrink-0">
-      <span className={cn('size-1.5 rounded-full', s.dot)} />
-      {s.label}
-    </Badge>
+    <span
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-semibold"
+      style={{
+        color: c,
+        borderColor: `color-mix(in oklch, ${c} 38%, transparent)`,
+        backgroundColor: `color-mix(in oklch, ${c} 13%, transparent)`,
+      }}
+    >
+      <span className="size-1.5 rounded-full" style={{ backgroundColor: c }} />
+      {LABEL[status]}
+    </span>
   )
 }

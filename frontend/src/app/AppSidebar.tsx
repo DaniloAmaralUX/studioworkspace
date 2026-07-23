@@ -33,9 +33,9 @@ export function AppSidebar() {
                   <Boxes className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Project Studio</span>
+                  <span className="truncate font-semibold">Studio</span>
                   <span className="truncate text-xs text-muted-foreground">
-                    local workspace
+                    design engineer
                   </span>
                 </div>
               </NavLink>
@@ -46,7 +46,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupLabel>Organização</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {nav.map((item) => {

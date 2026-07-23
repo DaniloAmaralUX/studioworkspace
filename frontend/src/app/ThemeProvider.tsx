@@ -23,7 +23,8 @@ function isDark(mode: ThemeMode): boolean {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = React.useState<ThemeMode>(
-    () => (localStorage.getItem(STORAGE_KEY) as ThemeMode | null) ?? 'system',
+    // Dark por padrao (workspace Design Engineer). O usuario pode trocar.
+    () => (localStorage.getItem(STORAGE_KEY) as ThemeMode | null) ?? 'dark',
   )
 
   React.useEffect(() => {

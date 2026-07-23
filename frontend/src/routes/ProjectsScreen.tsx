@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ProjectCard } from '@/components/ProjectCard'
+import { ProjectRow } from '@/components/ProjectRow'
 import { EmptyState } from '@/components/EmptyState'
 import { AddProjectDialog } from '@/components/AddProjectDialog'
 import { useProjects } from '@/hooks/useProjects'
@@ -44,13 +44,13 @@ export function ProjectsScreen() {
   }, [data, q])
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-4xl px-6 py-8">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
+        <div className="flex items-baseline gap-3">
           <h1 className="text-xl font-semibold tracking-tight">Projetos</h1>
-          <p className="text-sm text-muted-foreground">
-            {data ? `${data.length} projeto(s)` : 'Carregando…'}
-          </p>
+          <span className="tnum text-sm text-muted-foreground">
+            {data ? `${data.length} ativos` : 'carregando…'}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -68,9 +68,19 @@ export function ProjectsScreen() {
       </header>
 
       {isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="overflow-hidden rounded-xl border bg-card">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-56 w-full" />
+            <div
+              key={i}
+              className="flex items-center gap-3 border-b border-border/60 px-4 py-3 last:border-b-0"
+            >
+              <Skeleton className="size-2 rounded-full" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-3.5 w-40" />
+                <Skeleton className="h-3 w-64" />
+              </div>
+              <Skeleton className="h-5 w-24 rounded-full" />
+            </div>
           ))}
         </div>
       )}
@@ -94,9 +104,9 @@ export function ProjectsScreen() {
       {!isLoading && !isError && data && data.length === 0 && <EmptyState />}
 
       {!isLoading && !isError && filtered.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="overflow-hidden rounded-xl border bg-card">
           {filtered.map((p) => (
-            <ProjectCard key={p.id} project={p} />
+            <ProjectRow key={p.id} project={p} />
           ))}
         </div>
       )}
