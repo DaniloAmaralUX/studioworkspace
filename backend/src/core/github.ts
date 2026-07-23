@@ -64,3 +64,15 @@ export async function ghRepoView(nameWithOwner: string): Promise<GithubRepo> {
   )
   return normalize(JSON.parse(stdout) as RawRepo)
 }
+
+const CLONE_TIMEOUT = 120_000
+
+export async function ghClone(
+  nameWithOwner: string,
+  destDir: string,
+): Promise<void> {
+  await pExecFile('gh', ['repo', 'clone', nameWithOwner, destDir], {
+    windowsHide: true,
+    timeout: CLONE_TIMEOUT,
+  })
+}

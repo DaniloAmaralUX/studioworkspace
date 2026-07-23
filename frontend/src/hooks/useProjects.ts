@@ -56,6 +56,16 @@ export function useAddLocalProject() {
   })
 }
 
+export function useCloneProject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.cloneProject(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: KEY })
+    },
+  })
+}
+
 export function useAddGithubProject() {
   const qc = useQueryClient()
   return useMutation({

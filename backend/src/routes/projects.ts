@@ -96,9 +96,11 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
         .code(404)
         .send({ error: { code: 'not_found', message: 'Projeto não encontrado' } })
     }
-    if (project.source.kind !== 'local') {
+    const target =
+      project.source.kind === 'local' ? project.source.path : project.source.cloneDir
+    if (!target) {
       return { isRepo: false, reason: 'github-not-cloned' }
     }
-    return await gitInfo(project.source.path)
+    return await gitInfo(target)
   })
 }

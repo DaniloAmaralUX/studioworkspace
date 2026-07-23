@@ -24,6 +24,22 @@ async function hasClaudeProtocol(): Promise<boolean> {
   }
 }
 
+// Lê o handler real do protocolo claude:// no registro (version-proof — o
+// caminho do .exe muda a cada release do Claude Desktop).
+async function claudeExePath(): Promise<string | null> {
+  try {
+    const { stdout } = await pExecFile(
+      'reg',
+      ['query', 'HKCU\\Software\\Classes\\claude\\shell\\open\\command', '/ve'],
+      { windowsHide: true },
+    )
+    const match = stdout.match(/"([^"]+\.exe)"/i)
+    return match?.[1] ?? null
+  } catch {
+    return null
+  }
+}
+
 export type Launchers = Record<LauncherKind, boolean>
 
 export async function detectLaunchers(): Promise<Launchers> {
@@ -59,10 +75,19 @@ export async function openTarget(
     case 'cursor':
       spawnDetached(kind, [targetPath])
       return
-    case 'claude':
-      // Fatia 3 — spike claude:// (deep-link para abrir uma pasta no Claude Desktop).
-      throw new Error(
-        'Abrir no Claude Code Desktop ainda não implementado (Fatia 3 — spike claude://).',
-      )
+    case 'claude': {
+      // claude://code/new?folder=<caminho-absoluto> — formato oficial
+      // (support.claude.com). O próprio Claude Desktop mostra um diálogo de
+      // confirmação da pasta antes de adotá-la.
+      const url = `claude://code/new?folder=${encodeURIComponent(targetPath)}`
+      const exe = await claudeExePath()
+      if (exe) {
+        spawnDetached(exe, [url])
+      } else {
+        // Fallback: sem handler no registro, deixa o Windows resolver o protocolo.
+        spawnDetached('rundll32', ['url.dll,FileProtocolHandler', url])
+      }
+      return
+    }
   }
 }

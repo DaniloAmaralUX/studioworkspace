@@ -52,7 +52,7 @@ export function ProjectCard({ project }: { project: Project }) {
             ))}
           </span>
         </div>
-        <OpenWithButtons projectId={project.id} />
+        <OpenWithButtons project={project} />
       </CardFooter>
     </Card>
   )

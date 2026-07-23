@@ -14,7 +14,11 @@ export function ProjectDetail() {
   const { id = '' } = useParams()
   const { data: projects } = useProjects()
   const project = projects?.find((p) => p.id === id)
-  const git = useProjectGit(id, !!project && project.source.kind === 'local')
+  const git = useProjectGit(
+    id,
+    !!project &&
+      (project.source.kind === 'local' || !!project.source.cloneDir),
+  )
 
   const back = (
     <Link
@@ -95,15 +99,15 @@ export function ProjectDetail() {
             <p className="mb-1.5 text-xs font-medium text-muted-foreground">
               Abrir
             </p>
-            <OpenWithButtons projectId={project.id} />
+            <OpenWithButtons project={project} />
           </section>
         </TabsContent>
 
         <TabsContent value="engineering" className="pt-5">
-          {project.source.kind !== 'local' ? (
+          {project.source.kind === 'github' && !project.source.cloneDir ? (
             <p className="text-sm text-muted-foreground">
-              Repositório GitHub — o status de código aparece após o clone (sob
-              demanda, chega na Fatia 3).
+              Repositório GitHub ainda não clonado — o status de código aparece
+              depois que você clonar (use um dos botões "Abrir" acima).
             </p>
           ) : git.isLoading ? (
             <p className="text-sm text-muted-foreground">Lendo git…</p>

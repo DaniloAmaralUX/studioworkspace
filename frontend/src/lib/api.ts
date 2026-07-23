@@ -10,8 +10,8 @@ const BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:5178/api'
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...init,
+    headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
   })
   if (!res.ok) {
     let message = `HTTP ${res.status}`
@@ -90,6 +90,8 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ nameWithOwner }),
     }),
+  cloneProject: (id: string) =>
+    req<Project>(`/projects/${id}/clone`, { method: 'POST' }),
   getProjectGit: (id: string) => req<GitInfo>(`/projects/${id}/git`),
   getFoundation: (id: string) =>
     req<FoundationResponse>(`/projects/${id}/foundation`),

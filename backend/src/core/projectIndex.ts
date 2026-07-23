@@ -51,6 +51,26 @@ export async function patchProject(
   return updated
 }
 
+export async function setCloneDir(
+  id: string,
+  cloneDir: string,
+): Promise<Project | undefined> {
+  const list = await loadProjects()
+  const idx = list.findIndex((p) => p.id === id)
+  if (idx === -1) return undefined
+  const current = list[idx]!
+  if (current.source.kind !== 'github') return current
+  const updated: Project = {
+    ...current,
+    source: { ...current.source, cloneDir },
+    updatedAt: new Date().toISOString(),
+  }
+  const next = [...list]
+  next[idx] = updated
+  await persist(next)
+  return updated
+}
+
 export async function removeProject(id: string): Promise<boolean> {
   const list = await loadProjects()
   const next = list.filter((p) => p.id !== id)
