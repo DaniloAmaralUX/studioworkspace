@@ -74,3 +74,11 @@ export function useGithubRepos(enabled: boolean) {
     staleTime: 60_000,
   })
 }
+
+export function useProjectGit(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['git', id],
+    queryFn: () => api.getProjectGit(id),
+    enabled,
+  })
+}

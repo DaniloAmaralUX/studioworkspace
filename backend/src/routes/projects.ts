@@ -5,11 +5,13 @@ import { z } from 'zod'
 import {
   addProject,
   findBySource,
+  getProject,
   loadProjects,
   patchProject,
   removeProject,
 } from '../core/projectIndex'
 import { detectStack } from '../core/stackDetect'
+import { gitInfo } from '../core/git'
 
 const patchSchema = z.object({
   name: z.string().min(1).optional(),
@@ -83,5 +85,20 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
         .send({ error: { code: 'not_found', message: 'Projeto não encontrado' } })
     }
     return { ok: true }
+  })
+
+  // Lente "Engineering": status git da pasta local.
+  app.get('/api/projects/:id/git', async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const project = await getProject(id)
+    if (!project) {
+      return reply
+        .code(404)
+        .send({ error: { code: 'not_found', message: 'Projeto não encontrado' } })
+    }
+    if (project.source.kind !== 'local') {
+      return { isRepo: false, reason: 'github-not-cloned' }
+    }
+    return await gitInfo(project.source.path)
   })
 }

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { StatusBadge } from './StatusBadge'
@@ -12,9 +13,12 @@ export function ProjectCard({ project }: { project: Project }) {
     <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-semibold leading-tight">
+          <Link
+            to={`/projects/${project.id}`}
+            className="text-base font-semibold leading-tight hover:underline"
+          >
             {project.name}
-          </h3>
+          </Link>
           <StatusBadge status={project.status} />
         </div>
         <SourceBadge source={project.source} />

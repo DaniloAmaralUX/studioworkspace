@@ -33,6 +33,17 @@ export type GithubRepo = {
   url: string
 }
 
+export type GitInfo =
+  | { isRepo: false; reason?: string }
+  | {
+      isRepo: true
+      branch: string
+      dirtyCount: number
+      lastCommit: string | null
+      ahead: number
+      behind: number
+    }
+
 export const api = {
   health: () => req<{ ok: boolean }>('/health'),
   listProjects: () => req<Project[]>('/projects'),
@@ -60,6 +71,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ nameWithOwner }),
     }),
+  getProjectGit: (id: string) => req<GitInfo>(`/projects/${id}/git`),
 }
 
 export type { ProjectStatus }
