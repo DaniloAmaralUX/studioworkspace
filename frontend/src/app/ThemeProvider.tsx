@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { applyStoredPreset } from '@/lib/theme'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
@@ -28,6 +29,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark(mode))
   }, [mode])
+
+  // Reaplica o preset de cores salvo (Temas) ao carregar/qualquer rota.
+  React.useEffect(() => {
+    applyStoredPreset()
+  }, [])
 
   // Reage à mudança do tema do SO quando o modo é "system".
   React.useEffect(() => {
