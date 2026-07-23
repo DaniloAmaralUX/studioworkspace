@@ -1,4 +1,10 @@
-import type { Launchers, LauncherKind, Project, ProjectStatus } from './types'
+import type {
+  Foundation,
+  Launchers,
+  LauncherKind,
+  Project,
+  ProjectStatus,
+} from './types'
 
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:5178/api'
 
@@ -44,6 +50,19 @@ export type GitInfo =
       behind: number
     }
 
+export type Template = {
+  id: string
+  name: string
+  repoUrl: string
+  description?: string
+  createdAt: string
+}
+
+export type FoundationResponse = {
+  foundation: Foundation | null
+  shadcnCommand: string | null
+}
+
 export const api = {
   health: () => req<{ ok: boolean }>('/health'),
   listProjects: () => req<Project[]>('/projects'),
@@ -72,6 +91,21 @@ export const api = {
       body: JSON.stringify({ nameWithOwner }),
     }),
   getProjectGit: (id: string) => req<GitInfo>(`/projects/${id}/git`),
+  getFoundation: (id: string) =>
+    req<FoundationResponse>(`/projects/${id}/foundation`),
+  putFoundation: (id: string, f: Foundation) =>
+    req<{ foundation: Foundation; shadcnCommand: string; designPath: string }>(
+      `/projects/${id}/foundation`,
+      { method: 'PUT', body: JSON.stringify(f) },
+    ),
+  listTemplates: () => req<Template[]>('/templates'),
+  addTemplate: (input: { name: string; repoUrl: string; description?: string }) =>
+    req<Template>('/templates', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+  removeTemplate: (id: string) =>
+    req<{ ok: true }>(`/templates/${id}`, { method: 'DELETE' }),
 }
 
 export type { ProjectStatus }

@@ -5,6 +5,7 @@ import { healthRoutes } from './routes/health'
 import { projectRoutes } from './routes/projects'
 import { openRoutes } from './routes/open'
 import { githubRoutes } from './routes/github'
+import { foundationRoutes } from './routes/foundation'
 
 const app = Fastify({ logger: true })
 
@@ -15,6 +16,7 @@ await app.register(healthRoutes)
 await app.register(projectRoutes)
 await app.register(openRoutes)
 await app.register(githubRoutes)
+await app.register(foundationRoutes)
 
 try {
   await app.listen({ host: HOST, port: PORT })

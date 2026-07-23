@@ -4,7 +4,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { api, type ProjectPatch } from '@/lib/api'
-import type { LauncherKind, Project } from '@/lib/types'
+import type { Foundation, LauncherKind, Project } from '@/lib/types'
 
 const KEY = ['projects'] as const
 
@@ -80,5 +80,48 @@ export function useProjectGit(id: string, enabled: boolean) {
     queryKey: ['git', id],
     queryFn: () => api.getProjectGit(id),
     enabled,
+  })
+}
+
+export function useFoundation(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['foundation', id],
+    queryFn: () => api.getFoundation(id),
+    enabled,
+  })
+}
+
+export function usePutFoundation(id: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (f: Foundation) => api.putFoundation(id, f),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['foundation', id] })
+    },
+  })
+}
+
+export function useTemplates() {
+  return useQuery({ queryKey: ['templates'], queryFn: api.listTemplates })
+}
+
+export function useAddTemplate() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { name: string; repoUrl: string; description?: string }) =>
+      api.addTemplate(input),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['templates'] })
+    },
+  })
+}
+
+export function useRemoveTemplate() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.removeTemplate(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['templates'] })
+    },
   })
 }

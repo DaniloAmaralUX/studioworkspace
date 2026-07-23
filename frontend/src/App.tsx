@@ -6,6 +6,7 @@ import { ProjectsScreen } from '@/routes/ProjectsScreen'
 import { ThemesScreen } from '@/routes/ThemesScreen'
 import { TemplatesScreen } from '@/routes/TemplatesScreen'
 import { ProjectDetail } from '@/routes/ProjectDetail'
+import { FoundationScreen } from '@/routes/FoundationScreen'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -21,6 +22,10 @@ export default function App() {
             <Route path="themes" element={<ThemesScreen />} />
             <Route path="templates" element={<TemplatesScreen />} />
             <Route path="projects/:id" element={<ProjectDetail />} />
+            <Route
+              path="projects/:id/foundation"
+              element={<FoundationScreen />}
+            />
           </Route>
         </Routes>
       </ThemeProvider>

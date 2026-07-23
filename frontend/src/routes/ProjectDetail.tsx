@@ -6,6 +6,7 @@ import { SourceBadge } from '@/components/SourceBadge'
 import { NextActionInput } from '@/components/NextActionInput'
 import { OpenWithButtons } from '@/components/OpenWithButtons'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getStoredPresetName } from '@/lib/theme'
 
@@ -129,7 +130,7 @@ export function ProjectDetail() {
           )}
         </TabsContent>
 
-        <TabsContent value="design" className="space-y-2 pt-5">
+        <TabsContent value="design" className="space-y-4 pt-5">
           <p className="text-sm text-muted-foreground">
             Tema aplicado no Studio:{' '}
             <span className="font-medium text-foreground">
@@ -137,10 +138,18 @@ export function ProjectDetail() {
             </span>
             .
           </p>
-          <p className="text-sm text-muted-foreground">
-            O configurador de Foundation (base color / tema / fonte / radius →
-            <code> foundation.json</code> + <code>DESIGN.md</code>) chega na R5.
-          </p>
+          {project.source.kind === 'local' ? (
+            <Button asChild>
+              <Link to={`/projects/${project.id}/foundation`}>
+                Configurar Foundation
+              </Link>
+            </Button>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              O configurador de Foundation fica disponível após clonar o
+              repositório.
+            </p>
+          )}
         </TabsContent>
       </Tabs>
     </div>

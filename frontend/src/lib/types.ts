@@ -27,3 +27,15 @@ export interface Project {
 
 export type LauncherKind = 'explorer' | 'terminal' | 'claude' | 'code' | 'cursor'
 export type Launchers = Record<LauncherKind, boolean>
+
+export type Density = 'compact' | 'comfortable' | 'spacious'
+
+export interface Foundation {
+  framework: string
+  baseColor: string
+  theme: string
+  font: string
+  radius: string
+  density: Density
+  iconLibrary: string
+}
