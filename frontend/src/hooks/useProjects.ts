@@ -66,6 +66,20 @@ export function useCloneProject() {
   })
 }
 
+export function useScaffoldProject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: {
+      name: string
+      parentDir: string
+      templateRepoUrl?: string
+    }) => api.scaffoldProject(input),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: KEY })
+    },
+  })
+}
+
 export function useAddGithubProject() {
   const qc = useQueryClient()
   return useMutation({

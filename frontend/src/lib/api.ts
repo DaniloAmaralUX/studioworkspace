@@ -114,6 +114,15 @@ export const api = {
     }),
   stampProject: (id: string) =>
     req<StampResult>(`/projects/${id}/stamp`, { method: 'POST' }),
+  scaffoldProject: (input: {
+    name: string
+    parentDir: string
+    templateRepoUrl?: string
+  }) =>
+    req<{ project: Project; dir: string; cloned: boolean; stamped: string[] }>(
+      '/projects/scaffold',
+      { method: 'POST', body: JSON.stringify(input) },
+    ),
 }
 
 export type StampAction = 'created' | 'updated' | 'unchanged'

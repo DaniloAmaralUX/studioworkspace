@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { Plus, Loader2, Search } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Loader2, Search, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,32 +13,52 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   useAddGithubProject,
   useAddLocalProject,
   useGithubRepos,
+  useScaffoldProject,
+  useTemplates,
 } from '@/hooks/useProjects'
 import { timeAgo } from '@/lib/utils'
 
 export function AddProjectDialog() {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const [tab, setTab] = useState('local')
+  const [tab, setTab] = useState('criar')
   const [pathInput, setPathInput] = useState('')
   const [nameInput, setNameInput] = useState('')
   const [repoQuery, setRepoQuery] = useState('')
+  // aba Criar
+  const [scName, setScName] = useState('')
+  const [scParent, setScParent] = useState('')
+  const [scBase, setScBase] = useState('blank')
 
   const addLocal = useAddLocalProject()
   const addGithub = useAddGithubProject()
+  const scaffold = useScaffoldProject()
   const repos = useGithubRepos(open && tab === 'github')
+  const templates = useTemplates()
 
   function close() {
     setOpen(false)
     setPathInput('')
     setNameInput('')
     setRepoQuery('')
+    setScName('')
+    setScParent('')
+    setScBase('blank')
     addLocal.reset()
     addGithub.reset()
+    scaffold.reset()
   }
 
   function submitLocal(e: FormEvent) {
@@ -45,6 +66,24 @@ export function AddProjectDialog() {
     addLocal.mutate(
       { path: pathInput.trim(), name: nameInput.trim() || undefined },
       { onSuccess: close },
+    )
+  }
+
+  function submitScaffold(e: FormEvent) {
+    e.preventDefault()
+    scaffold.mutate(
+      {
+        name: scName.trim(),
+        parentDir: scParent.trim(),
+        templateRepoUrl: scBase === 'blank' ? undefined : scBase,
+      },
+      {
+        onSuccess: (res) => {
+          const id = res.project.id
+          close()
+          navigate(`/projects/${id}`)
+        },
+      },
     )
   }
 
@@ -61,18 +100,84 @@ export function AddProjectDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Adicionar projeto</DialogTitle>
+          <DialogTitle>Novo projeto</DialogTitle>
           <DialogDescription>
-            Associe uma pasta local ou um repositório do GitHub. Nada é copiado
-            ou movido.
+            Crie um projeto já no seu padrão, ou associe uma pasta/repo
+            existente.
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="criar">Criar</TabsTrigger>
             <TabsTrigger value="local">Pasta local</TabsTrigger>
             <TabsTrigger value="github">GitHub</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="criar">
+            <form onSubmit={submitScaffold} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="sc-name">Nome do projeto</Label>
+                <Input
+                  id="sc-name"
+                  value={scName}
+                  onChange={(e) => setScName(e.target.value)}
+                  placeholder="Meu Novo App"
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="sc-parent">Pasta-mãe (onde criar)</Label>
+                <Input
+                  id="sc-parent"
+                  value={scParent}
+                  onChange={(e) => setScParent(e.target.value)}
+                  placeholder="C:\Users\...\dev"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Base</Label>
+                <Select value={scBase} onValueChange={setScBase}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blank">
+                      Em branco (só o meu padrão)
+                    </SelectItem>
+                    {(templates.data ?? []).map((t) => (
+                      <SelectItem key={t.id} value={t.repoUrl}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                <Sparkles className="mt-px size-3.5 shrink-0 text-primary" />
+                Cria uma pasta nova e já carimba suas regras de design + shadcn
+                MCP. Qualquer IDE abre sabendo seu contexto.
+              </p>
+              {scaffold.isError && (
+                <p className="text-sm text-destructive">
+                  {(scaffold.error as Error).message}
+                </p>
+              )}
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  disabled={
+                    !scName.trim() || !scParent.trim() || scaffold.isPending
+                  }
+                >
+                  {scaffold.isPending && (
+                    <Loader2 className="size-4 animate-spin" />
+                  )}
+                  Criar projeto
+                </Button>
+              </DialogFooter>
+            </form>
+          </TabsContent>
 
           <TabsContent value="local">
             <form onSubmit={submitLocal} className="space-y-3">
@@ -83,7 +188,6 @@ export function AddProjectDialog() {
                   value={pathInput}
                   onChange={(e) => setPathInput(e.target.value)}
                   placeholder="C:\Users\...\meu-projeto"
-                  autoFocus
                 />
               </div>
               <div className="space-y-1.5">

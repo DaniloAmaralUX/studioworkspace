@@ -9,6 +9,7 @@ import { githubRoutes } from './routes/github'
 import { foundationRoutes } from './routes/foundation'
 import { aiRoutes } from './routes/ai'
 import { stampRoutes } from './routes/stamp'
+import { scaffoldRoutes } from './routes/scaffold'
 
 const app = Fastify({ logger: true })
 
@@ -22,6 +23,7 @@ await app.register(githubRoutes)
 await app.register(foundationRoutes)
 await app.register(aiRoutes)
 await app.register(stampRoutes)
+await app.register(scaffoldRoutes)
 
 try {
   await app.listen({ host: HOST, port: PORT })
