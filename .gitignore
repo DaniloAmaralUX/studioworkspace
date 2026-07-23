@@ -1,0 +1,30 @@
+# Dependências
+node_modules/
+**/node_modules/
+
+# Build
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Ambiente / segredos (nunca commitar)
+.env
+.env.*
+!.env.example
+
+# Dados locais do Workspace Service
+projects.json
+work/                 # clones sob demanda de repos do GitHub
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+
+# Config local do Claude Code (não faz parte da ferramenta)
+.claude/settings.local.json
