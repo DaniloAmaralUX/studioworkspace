@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Studio — Manual pessoal</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b0b0d;
+      --panel: #131317;
+      --panel-2: #1a1a20;
+      --border: #26262d;
+      --text: #e6e6ea;
+      --muted: #9a9aa5;
+      --primary: #6ea8ff;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --code: #f4f4f6;
+      --code-bg: #22222a;
+      --radius: 0.625rem;
+      --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+      --font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #fafafa;
+        --panel: #ffffff;
+        --panel-2: #f4f4f5;
+        --border: #e4e4e7;
+        --text: #18181b;
+        --muted: #6b6b74;
+        --primary: #2563eb;
+        --code: #18181b;
+        --code-bg: #f1f1f3;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      max-width: 1180px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { position: static !important; border-right: none !important; border-bottom: 1px solid var(--border); }
+      aside nav { padding: 12px 20px 20px !important; }
+    }
+    aside {
+      position: sticky; top: 0; align-self: start;
+      height: 100vh; overflow-y: auto;
+      border-right: 1px solid var(--border);
+      background: var(--panel);
+      padding: 28px 20px;
+    }
+    aside .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 600; font-size: 15px; margin-bottom: 4px;
+    }
+    aside .brand .dot {
+      width: 10px; height: 10px; border-radius: 999px;
+      background: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 20%, transparent);
+    }
+    aside .sub { color: var(--muted); font-size: 12px; margin-bottom: 24px; }
+    aside nav a {
+      display: block; padding: 6px 10px; margin: 2px 0;
+      color: var(--muted); text-decoration: none; font-size: 14px;
+      border-radius: 6px;
+    }
+    aside nav a:hover { color: var(--text); background: var(--panel-2); }
+    aside .group-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin: 18px 10px 6px;
+    }
+    main { padding: 56px 48px 96px; max-width: 820px; }
+    @media (max-width: 860px) { main { padding: 32px 20px 64px; } }
+
+    h1 { font-size: 34px; line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; }
+    h2 {
+      font-size: 22px; margin: 56px 0 12px; letter-spacing: -0.005em;
+      padding-top: 24px; border-top: 1px solid var(--border);
+    }
+    h3 { font-size: 16px; margin: 24px 0 6px; }
+    p { margin: 8px 0 14px; color: var(--text); }
+    .lede { font-size: 18px; color: var(--muted); margin-top: 0; }
+    ul, ol { padding-left: 22px; margin: 8px 0 14px; }
+    li { margin: 4px 0; }
+    strong { color: var(--text); }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code, kbd {
+      font-family: var(--font-mono); font-size: 0.92em;
+      color: var(--code); background: var(--code-bg);
+      padding: 2px 6px; border-radius: 5px;
+      border: 1px solid var(--border);
+    }
+    pre {
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+      overflow-x: auto; font-size: 13px; line-height: 1.55;
+      color: var(--code);
+    }
+    pre code { background: transparent; border: none; padding: 0; }
+
+    .callout {
+      display: flex; gap: 12px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-left: 3px solid var(--primary);
+      padding: 14px 16px; border-radius: var(--radius); margin: 16px 0;
+    }
+    .callout.warn { border-left-color: var(--warning); }
+    .callout.danger { border-left-color: var(--danger); }
+    .callout.ok { border-left-color: var(--success); }
+    .callout .icon { font-family: var(--font-mono); font-weight: 600; color: var(--muted); }
+    .callout p { margin: 0; }
+
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+    }
+    .card .title { font-weight: 600; margin-bottom: 4px; }
+    .card .desc { color: var(--muted); font-size: 14px; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+      border: 1px solid var(--border); background: var(--panel-2);
+      color: var(--muted);
+    }
+    .badge.ok { color: var(--success); border-color: color-mix(in oklab, var(--success) 40%, var(--border)); }
+    .badge.pending { color: var(--warning); border-color: color-mix(in oklab, var(--warning) 40%, var(--border)); }
+
+    .roadmap { list-style: none; padding: 0; margin: 12px 0; }
+    .roadmap li {
+      display: grid; grid-template-columns: 90px 1fr auto; gap: 12px;
+      padding: 10px 14px; border: 1px solid var(--border);
+      border-radius: var(--radius); margin: 6px 0; background: var(--panel);
+      align-items: center;
+    }
+    .roadmap .id { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+    .roadmap .name { font-weight: 500; }
+
+    .kbd-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    kbd {
+      background: var(--panel); border: 1px solid var(--border);
+      box-shadow: inset 0 -1px 0 var(--border);
+      padding: 2px 6px; font-size: 12px;
+    }
+
+    footer { color: var(--muted); font-size: 13px; margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand"><span class="dot"></span> Project Studio</div>
+      <div class="sub">Manual pessoal · leia antes de usar</div>
+      <div class="group-label">Contexto</div>
+      <nav>
+        <a href="#o-que-e">O que é</a>
+        <a href="#por-que">Por que existe</a>
+        <a href="#regras">Regras de ouro</a>
+      </nav>
+      <div class="group-label">Uso</div>
+      <nav>
+        <a href="#como-rodar">Como rodar</a>
+        <a href="#como-usar">Como usar</a>
+        <a href="#atalhos">Atalhos</a>
+      </nav>
+      <div class="group-label">Estado</div>
+      <nav>
+        <a href="#roadmap">Roadmap</a>
+        <a href="#o-que-nao-e">O que NÃO é</a>
+        <a href="#quando-travar">Quando travar</a>
+      </nav>
+    </aside>
+
+    <main>
+      <span class="badge">v1 · uso pessoal</span>
+      <h1 id="o-que-e">Project Studio</h1>
+      <p class="lede">Um hub visual local dos meus projetos — pastas locais <em>e</em> repositórios do GitHub — para achar, organizar e entrar neles rápido, com a <strong>próxima ação sempre visível</strong>.</p>
+
+      <div class="callout ok">
+        <span class="icon">i</span>
+        <p><strong>Se você está lendo isso, provavelmente esqueceu como isso funciona.</strong> Isso é normal. Leia as 3 primeiras seções (2 minutos), abra a aplicação, e vá.</p>
+      </div>
+
+      <h2 id="por-que">Por que existe</h2>
+      <p>Meus projetos ficam espalhados entre pastas locais, repositórios no GitHub, Claude Code, Codex e PowerShell. Retomar exige lembrar onde parei e reconstruir contexto — e cada atrito multiplica a chance de perder o fio.</p>
+      <div class="cards">
+        <div class="card">
+          <div class="title">O problema</div>
+          <div class="desc">Custo alto de "achar de novo" o projeto certo e a próxima coisa a fazer.</div>
+        </div>
+        <div class="card">
+          <div class="title">A solução</div>
+          <div class="desc">Um painel único onde cada projeto vira card com status, stack, atividade e uma próxima ação editável.</div>
+        </div>
+        <div class="card">
+          <div class="title">A promessa</div>
+          <div class="desc">Achar em &lt; 5s. Entender o estado em &lt; 10s. Abrir em ≤ 2 cliques.</div>
+        </div>
+        <div class="card">
+          <div class="title">O diferencial</div>
+          <div class="desc">Configurador de <em>foundation</em> estilo <code>shadcn/create</code> com preview real.</div>
+        </div>
+      </div>
+
+      <h2 id="regras">Regras de ouro (não violar)</h2>
+      <ol>
+        <li><strong>Local-only.</strong> Servido só em <code>127.0.0.1</code>. Nunca em <code>0.0.0.0</code>, nunca porta pública.</li>
+        <li><strong>Nunca guardar tokens.</strong> GitHub via <code>gh</code> CLI já autenticado. Não copiar nem persistir credenciais.</li>
+        <li><strong>Não mover arquivos.</strong> Associar pasta ≠ copiar. Remover do hub ≠ apagar. Confirmar antes de clonar ou abrir.</li>
+        <li><strong>Sem agente embutido.</strong> "Trabalhar" = abrir no Claude Code Desktop / Terminal / Explorer. O CLI <code>claude</code>/<code>codex</code> não está no PATH aqui.</li>
+        <li><strong>Fatias verticais.</strong> Uma coisa por vez, ponta a ponta. Não construir o que está em "Fora do escopo".</li>
+        <li><strong>npm, não pnpm.</strong> Bug conhecido de shadcn/pnpm neste Windows.</li>
+      </ol>
+
+      <h2 id="como-rodar">Como rodar</h2>
+      <p>Dois processos, cada um numa porta local:</p>
+      <pre><code># tudo de uma vez
+./start-workspace.ps1
+
+# ou manualmente:
+cd backend  && npm install && npm run dev   # 127.0.0.1:5178
+cd frontend && npm install && npm run dev   # 127.0.0.1:5177</code></pre>
+      <p>Abra <a href="http://127.0.0.1:5177">http://127.0.0.1:5177</a> no navegador. O backend precisa estar de pé (senão o hub mostra a faixa "Workspace Service não está rodando").</p>
+
+      <div class="callout warn">
+        <span class="icon">!</span>
+        <p>Se <code>gh</code> não estiver logado, a aba GitHub não carrega. Rode <code>gh auth status</code> — o app <em>não</em> faz login por você.</p>
+      </div>
+
+      <h2 id="como-usar">Como usar</h2>
+
+      <h3>1. Adicionar um projeto</h3>
+      <p>Clique em <strong>+ Projeto</strong> na topbar. Duas abas:</p>
+      <ul>
+        <li><strong>Pasta local:</strong> cola o caminho ou escolhe. O backend valida, checa duplicata, detecta a stack. <em>Não</em> copia nada.</li>
+        <li><strong>GitHub:</strong> lista seus repos via <code>gh repo list</code>. Selecionar cria um card só com metadados — <strong>não clona ainda</strong>.</li>
+      </ul>
+
+      <h3>2. Deixar a próxima ação visível</h3>
+      <p>No card, clique no campo "Próxima ação" e escreva uma coisa concreta ("escrever landing e conectar API"). Salva sozinho no blur. É o que você vê primeiro quando volta.</p>
+
+      <h3>3. Abrir e trabalhar</h3>
+      <p>Botão <strong>Abrir</strong> no card mostra só os abridores detectados:</p>
+      <ul>
+        <li><strong>Explorer</strong> — abre a pasta.</li>
+        <li><strong>Windows Terminal</strong> (<code>wt -d</code>) — já no diretório certo.</li>
+        <li><strong>Claude Code Desktop</strong> — via protocolo <code>claude://</code>.</li>
+        <li><strong>VS Code / Cursor</strong> — só aparecem se estiverem no PATH.</li>
+      </ul>
+      <p>Se o projeto for GitHub ainda sem clone, ele confirma antes de <code>gh repo clone</code> num diretório de trabalho — <em>daí</em> abre.</p>
+
+      <h3>4. Achar rápido</h3>
+      <div class="kbd-row">
+        <kbd>Ctrl</kbd><span>+</span><kbd>K</kbd>
+        <span>foca a busca. Filtra por nome, tag, owner/repo, stack.</span>
+      </div>
+      <p>Filtros ao lado: por tag, por stack, por fonte (Local/GitHub). Ordenação padrão: última atividade.</p>
+
+      <h3>5. Configurar foundation de um projeto (R5)</h3>
+      <p>Entra no projeto local → aba <strong>Foundation</strong>. Painel de 3 colunas estilo <code>shadcn/create</code>:</p>
+      <ul>
+        <li><strong>Esquerda:</strong> decisões (framework, base color, tema, fonte, radius, densidade, ícones).</li>
+        <li><strong>Meio:</strong> preview real com componentes shadcn reagindo aos tokens.</li>
+        <li><strong>Direita:</strong> comando <code>shadcn</code> gerado + salvar (<code>.workspace/foundation.json</code> + <code>.workspace/DESIGN.md</code>).</li>
+      </ul>
+      <div class="callout">
+        <span class="icon">→</span>
+        <p>Aplicar tem três modos: <strong>tudo</strong>, <strong>só tema</strong>, <strong>só fontes</strong>. O comando sempre aparece antes de rodar.</p>
+      </div>
+
+      <h2 id="atalhos">Atalhos e onde as coisas ficam</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="title">Backend</div>
+          <div class="desc"><code>127.0.0.1:5178</code> · Fastify + TS · sem banco (JSON atômico)</div>
+        </div>
+        <div class="card">
+          <div class="title">Frontend</div>
+          <div class="desc"><code>127.0.0.1:5177</code> · Vite + React + shadcn/ui</div>
+        </div>
+        <div class="card">
+          <div class="title">Índice global</div>
+          <div class="desc"><code>projects.json</code> (raiz do backend)</div>
+        </div>
+        <div class="card">
+          <div class="title">Estado por projeto</div>
+          <div class="desc"><code>.workspace/project.json</code> · <code>foundation.json</code> · <code>DESIGN.md</code></div>
+        </div>
+        <div class="card">
+          <div class="title">Fontes de verdade</div>
+          <div class="desc"><code>PRD.md</code> · <code>DESIGN.md</code> · <code>BACKEND.md</code> · <code>FRONTEND.md</code> · <code>ROADMAP.md</code></div>
+        </div>
+        <div class="card">
+          <div class="title">Instruções para o Claude</div>
+          <div class="desc"><code>CLAUDE.md</code> na raiz</div>
+        </div>
+      </div>
+
+      <h2 id="roadmap">Onde estamos</h2>
+      <p>Entrega em fatias verticais. Cada uma é usável de ponta a ponta.</p>
+      <ul class="roadmap">
+        <li><span class="id">Fatia 0</span><span class="name">Hub esqueleto — backend + hub + próxima ação editável</span><span class="badge ok">feita</span></li>
+        <li><span class="id">R1</span><span class="name">Shell estilo Linear — sidebar, rotas, shadcn, tema</span><span class="badge ok">feita</span></li>
+        <li><span class="id">R2</span><span class="name">Galeria de temas (36 presets tweakcn)</span><span class="badge ok">feita</span></li>
+        <li><span class="id">R3</span><span class="name">Fontes: pasta local + GitHub via <code>gh</code></span><span class="badge ok">feita</span></li>
+        <li><span class="id">R4</span><span class="name">Detalhe do projeto + lentes Engineering/Design</span><span class="badge ok">feita</span></li>
+        <li><span class="id">R5</span><span class="name">Configurador de Foundation + área Templates</span><span class="badge ok">feita</span></li>
+        <li><span class="id">R6</span><span class="name">Opener <code>claude://</code> + clone sob demanda</span><span class="badge ok">feita</span></li>
+      </ul>
+
+      <h2 id="o-que-nao-e">O que isto NÃO é</h2>
+      <p>Se você se pegar querendo adicionar algo daqui, pare e volte pro escopo.</p>
+      <ul>
+        <li>Não é IDE, terminal, Figma, Claude Code nem Codex — é o que <em>conduz</em> entre eles.</li>
+        <li>Não tem agente embutido, streaming, nem agentes em paralelo.</li>
+        <li>Não é multiusuário, não sincroniza com nuvem, não tem billing, não tem marketplace.</li>
+        <li>Não importa automaticamente <em>todos</em> os repos — você escolhe quais entram.</li>
+        <li>Não é um canvas estilo Figma nem um empacotamento desktop.</li>
+      </ul>
+
+      <h2 id="quando-travar">Quando eu travar</h2>
+      <p>Regra pessoal: se eu passar mais de 5 minutos sem saber o que fazer, aplico este roteiro.</p>
+      <ol>
+        <li>Abro o hub. Vejo a próxima ação de cada projeto <em>ativo</em>.</li>
+        <li>Escolho o projeto cuja próxima ação está mais concreta. Se nenhuma estiver concreta, o problema é <em>essa</em> — reescrever a próxima ação vira a próxima ação.</li>
+        <li>Uma decisão por vez. Fatia vertical. Commit pequeno.</li>
+        <li>Se travei numa fatia, pergunto: "isto já está no MVP ou virou enfeite?" — se enfeite, corto.</li>
+      </ol>
+
+      <div class="callout danger">
+        <span class="icon">×</span>
+        <p><strong>Nada destrutivo sem confirmação.</strong> Remover do hub é seguro (não apaga a pasta). Clonar é confirmado. Nunca há push/deploy/instalação automáticos.</p>
+      </div>
+
+      <footer>
+        Documentação pessoal · atualizar quando editar <code>PRD.md</code>, <code>DESIGN.md</code> ou <code>ROADMAP.md</code>.
+        <br />Abrir com duplo clique em <code>docs/index.html</code> — funciona offline, sem servidor.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
