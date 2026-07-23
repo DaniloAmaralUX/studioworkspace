@@ -38,15 +38,18 @@ Busca + filtro (tag/stack/fonte) + ordenar por última atividade; editar tags e 
 - [ ] Filtros por tag/stack/fonte e ordenação funcionam.
 - [ ] Editar tags/status por projeto (persiste).
 
-## Fatia 3 — Abrir / trabalhar
+## Fatia 3 — Abrir / trabalhar ✅ (concluída, ver R6)
 Abridores conforme disponibilidade; GitHub sem clone → `gh repo clone` sob demanda antes de abrir.
 
 **Pronto quando:**
-- [ ] `GET /api/launchers` reporta abridores disponíveis; a UI só mostra os presentes.
-- [ ] Abrir no Explorer e no Windows Terminal (`wt -d`) na pasta certa.
-- [ ] **Spike `claude://`** resolvido (deep-link que abre pasta no Claude Desktop) — ou fallback documentado.
-- [ ] Projeto GitHub sem clone dispara `gh repo clone` (com confirmação) e depois abre.
-- [ ] `code`/`cursor` aparecem só se detectados.
+- [x] `GET /api/launchers` reporta abridores disponíveis; a UI só mostra os presentes.
+- [x] Abrir no Explorer e no Windows Terminal (`wt -d`) na pasta certa.
+- [x] **Spike `claude://`** resolvido: `claude://code/new?folder=<pasta>` via exe lido do registro
+      (`HKCU\Software\Classes\claude\shell\open\command`); testado abrindo o Claude Desktop de verdade.
+- [x] Projeto GitHub sem clone dispara `gh repo clone` (com confirmação) e depois abre; reabrir não reclona.
+- [ ] `code`/`cursor` aparecem só se detectados — backend já detecta (`detectLaunchers`), mas o
+      `OpenWithButtons` do frontend ainda só lista explorer/terminal/claude. Gap pequeno, não atacado nesta
+      rodada (fora do pedido "claude:// + clone").
 
 ## Fatia 4 — Configurador de Foundation (diferencial)
 Painel estilo `shadcn/create` com preview real; salva `foundation.json`, gera `DESIGN.md` e o comando `shadcn`.
