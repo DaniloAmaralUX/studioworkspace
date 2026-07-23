@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { getProject, setCloneDir } from '../core/projectIndex'
 import { detectLaunchers, openTarget } from '../core/launcher'
 import { ghClone } from '../core/github'
+import { stampProject } from '../core/stamp'
 import { WORK_DIR } from '../config'
 
 const openSchema = z.object({
@@ -39,9 +40,24 @@ export async function openRoutes(app: FastifyInstance): Promise<void> {
         },
       })
     }
+    // Carimba o contexto de design antes de abrir num IDE/agente (claude/code/
+    // cursor). Para explorer/terminal não escreve nada — ali você só navega.
+    // Best-effort: uma falha aqui nunca deve impedir a abertura do projeto.
+    let stamped: string[] = []
+    const STAMP_ON = new Set(['claude', 'code', 'cursor'])
+    if (STAMP_ON.has(parsed.data.with)) {
+      try {
+        const result = await stampProject(targetPath)
+        stamped = result.files
+          .filter((f) => f.action !== 'unchanged')
+          .map((f) => f.file)
+      } catch (err) {
+        req.log.warn({ err }, 'stamp antes de abrir falhou (seguindo mesmo assim)')
+      }
+    }
     try {
       await openTarget(targetPath, parsed.data.with)
-      return { ok: true, opened: targetPath, with: parsed.data.with }
+      return { ok: true, opened: targetPath, with: parsed.data.with, stamped }
     } catch (err) {
       return reply
         .code(501)

@@ -5,6 +5,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { SourceBadge } from '@/components/SourceBadge'
 import { NextActionInput } from '@/components/NextActionInput'
 import { OpenWithButtons } from '@/components/OpenWithButtons'
+import { StampButton } from '@/components/StampButton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -100,6 +101,25 @@ export function ProjectDetail() {
               Abrir
             </p>
             <OpenWithButtons project={project} />
+          </section>
+
+          <section>
+            <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+              Portabilidade
+            </p>
+            <p className="mb-2 max-w-prose text-xs text-muted-foreground">
+              Escreve suas regras de design e a config do shadcn MCP dentro do
+              projeto (AGENTS.md, CLAUDE.md, Cursor, Copilot, VS Code) — para
+              qualquer IDE ou agente já conhecer seu contexto, sem depender de
+              conta.
+            </p>
+            {project.source.kind === 'github' && !project.source.cloneDir ? (
+              <p className="text-xs text-muted-foreground">
+                Disponível depois de clonar o repositório.
+              </p>
+            ) : (
+              <StampButton id={project.id} />
+            )}
           </section>
         </TabsContent>
 

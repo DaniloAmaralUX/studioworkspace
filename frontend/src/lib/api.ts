@@ -108,6 +108,18 @@ export const api = {
     }),
   removeTemplate: (id: string) =>
     req<{ ok: true }>(`/templates/${id}`, { method: 'DELETE' }),
+  aiNextAction: (id: string) =>
+    req<{ suggestion: string }>(`/projects/${id}/ai-next-action`, {
+      method: 'POST',
+    }),
+  stampProject: (id: string) =>
+    req<StampResult>(`/projects/${id}/stamp`, { method: 'POST' }),
+}
+
+export type StampAction = 'created' | 'updated' | 'unchanged'
+export type StampResult = {
+  dir: string
+  files: { file: string; action: StampAction }[]
 }
 
 export type { ProjectStatus }
