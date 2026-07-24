@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { z } from 'zod'
-import { listTemplates, putTemplate } from '../_lib/kv'
-import { internalError, methodNotAllowed, sendError } from '../_lib/http'
-import type { Template } from '../_lib/types'
+import { listTemplates, putTemplate } from '../_lib/kv.js'
+import { internalError, methodNotAllowed, sendError } from '../_lib/http.js'
+import type { Template } from '../_lib/types.js'
 
 const addSchema = z.object({
   name: z.string().min(1),

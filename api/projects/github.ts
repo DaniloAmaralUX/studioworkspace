@@ -4,9 +4,9 @@
 import { randomUUID } from 'node:crypto'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { z } from 'zod'
-import { findBySource, putProject } from '../_lib/kv'
-import { internalError, methodNotAllowed, sendError } from '../_lib/http'
-import type { Project } from '../_lib/types'
+import { findBySource, putProject } from '../_lib/kv.js'
+import { internalError, methodNotAllowed, sendError } from '../_lib/http.js'
+import type { Project } from '../_lib/types.js'
 
 const addSchema = z.object({
   nameWithOwner: z

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { listProjects } from '../_lib/kv'
-import { internalError, methodNotAllowed } from '../_lib/http'
+import { listProjects } from '../_lib/kv.js'
+import { internalError, methodNotAllowed } from '../_lib/http.js'
 
 export default async function handler(
   req: VercelRequest,

@@ -1,7 +1,7 @@
 // Persistência do Studio Cloud: Upstash Redis (Marketplace), substituindo o
 // JSON atômico do desktop. Hashes por entidade — escrita atômica por campo.
 import { Redis } from '@upstash/redis'
-import type { Project, ProjectSource, Template } from './types'
+import type { Project, ProjectSource, Template } from './types.js'
 
 const PROJECTS_KEY = 'ps:projects'
 const TEMPLATES_KEY = 'ps:templates'

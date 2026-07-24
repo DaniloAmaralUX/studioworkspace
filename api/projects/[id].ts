@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { z } from 'zod'
-import { deleteProject, getProject, putProject } from '../_lib/kv'
-import { internalError, methodNotAllowed, sendError } from '../_lib/http'
-import type { Project } from '../_lib/types'
+import { deleteProject, getProject, putProject } from '../_lib/kv.js'
+import { internalError, methodNotAllowed, sendError } from '../_lib/http.js'
+import type { Project } from '../_lib/types.js'
 
 // Mesmo patchSchema do backend desktop (routes/projects.ts).
 const patchSchema = z.object({

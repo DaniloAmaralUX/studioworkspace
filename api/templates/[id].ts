@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { deleteTemplate } from '../_lib/kv'
-import { internalError, methodNotAllowed, sendError } from '../_lib/http'
+import { deleteTemplate } from '../_lib/kv.js'
+import { internalError, methodNotAllowed, sendError } from '../_lib/http.js'
 
 export default async function handler(
   req: VercelRequest,
