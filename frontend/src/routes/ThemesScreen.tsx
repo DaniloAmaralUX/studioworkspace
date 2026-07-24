@@ -6,6 +6,9 @@ import {
   type ThemeVars,
 } from '@/lib/themePresets'
 import { clearPreset, getStoredPresetName, storePreset } from '@/lib/theme'
+
+/** Base do registry (public/r/*.json sai no mesmo deploy do hub). */
+const REGISTRY_URL = 'https://studioworkspace-mauve.vercel.app'
 import { useTheme } from '@/app/ThemeProvider'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -63,8 +66,9 @@ export function ThemesScreen() {
 
   const activePreset = themePresets.find((p) => p.name === active) ?? null
   const activeLabel = activePreset ? activePreset.label : 'Studio (padrão)'
-  const slug = activePreset ? activePreset.name : 'studio-dark'
-  const applyCmd = `npx shadcn apply @studio/${slug}`
+  const applyCmd = activePreset
+    ? `npx shadcn@latest add ${REGISTRY_URL}/r/${activePreset.name}.json`
+    : null
 
   function apply(preset: ThemePreset) {
     storePreset(preset)
@@ -75,6 +79,7 @@ export function ThemesScreen() {
     setActive(null)
   }
   function copyCmd() {
+    if (!applyCmd) return
     navigator.clipboard.writeText(applyCmd).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 1400)
@@ -138,18 +143,24 @@ export function ThemesScreen() {
               com um comando.
             </p>
           </div>
-          <div className="flex items-center gap-2 overflow-x-auto rounded-lg border bg-background px-3 py-2 font-mono text-[11.5px]">
-            <span className="text-primary">$</span>
-            <span className="whitespace-nowrap">{applyCmd}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto h-6 shrink-0 px-2"
-              onClick={copyCmd}
-            >
-              {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-            </Button>
-          </div>
+          {applyCmd ? (
+            <div className="flex items-center gap-2 overflow-x-auto rounded-lg border bg-background px-3 py-2 font-mono text-[11.5px]">
+              <span className="text-primary">$</span>
+              <span className="whitespace-nowrap">{applyCmd}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto h-6 shrink-0 px-2"
+                onClick={copyCmd}
+              >
+                {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+              </Button>
+            </div>
+          ) : (
+            <p className="rounded-lg border border-dashed bg-background px-3 py-2 text-xs text-muted-foreground">
+              Aplique um tema da biblioteca para gerar o comando.
+            </p>
+          )}
         </div>
       </div>
 
