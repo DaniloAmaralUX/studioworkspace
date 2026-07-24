@@ -5,6 +5,7 @@
   "description": "Dependências das funções serverless do Studio Cloud (api/ na raiz). O SPA vive em frontend/, o serviço desktop em backend/.",
   "dependencies": {
     "@upstash/redis": "^1.35.0",
+    "ai": "^7.0.37",
     "zod": "^3.24.1"
   },
   "devDependencies": {

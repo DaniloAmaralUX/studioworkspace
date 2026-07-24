@@ -89,3 +89,44 @@ export async function repoList(limit = 100): Promise<GithubRepo[]> {
 export async function repoView(nameWithOwner: string): Promise<GithubRepo> {
   return normalize(await gh<RawRepo>(`/repos/${nameWithOwner}`))
 }
+
+/** Assuntos dos commits recentes (mais novo primeiro). Best-effort: [] se falhar. */
+export async function repoCommits(
+  nameWithOwner: string,
+  limit = 12,
+): Promise<string[]> {
+  try {
+    const raw = await gh<{ commit: { message: string } }[]>(
+      `/repos/${nameWithOwner}/commits?per_page=${Math.min(limit, 50)}`,
+    )
+    return raw
+      .map((c) => c.commit.message.split('\n')[0]?.trim() ?? '')
+      .filter(Boolean)
+  } catch {
+    return []
+  }
+}
+
+/** Trecho do README (raw). Best-effort: null se não existir/falhar. */
+export async function repoReadme(
+  nameWithOwner: string,
+  maxChars = 2000,
+): Promise<string | null> {
+  const token = process.env.GITHUB_TOKEN
+  if (!token) return null
+  try {
+    const res = await fetch(`${API}/repos/${nameWithOwner}/readme`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.raw+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'project-studio-cloud',
+      },
+    })
+    if (!res.ok) return null
+    const text = await res.text()
+    return text.trim() ? text.slice(0, maxChars) : null
+  } catch {
+    return null
+  }
+}
