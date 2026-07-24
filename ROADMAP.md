@@ -66,3 +66,23 @@ Painel estilo `shadcn/create` com preview real; salva `foundation.json`, gera `D
 Agente embutido (`AgentAdapter`: `detect/run/resume/cancel` + streaming) quando/se o CLI ficar acessível;
 detalhe de projeto; múltiplas contas GitHub; empacotamento desktop (Tauri/Electron); presets de foundation
 compartilháveis.
+
+---
+
+## Modernizações adiadas (auditoria de fundação, 2026-07-24)
+
+Auditoria com Context7 confirmou a fundação em versão de ponta (defasagens reais corrigidas:
+tailwind-merge v3, lucide 1.x, @types/node 24, Inter removida). O que ficou de fora, de propósito —
+fazer só quando o gatilho chegar:
+
+| Item | Benefício | Custo | Gatilho |
+|---|---|---|---|
+| Vite 6→8 + `@vitejs/plugin-react` 6 | build mais rápido; linha 6 perde suporte quando Vite 9 sair | ~1 h (2 migration guides) | próxima fatia grande de frontend, ou lançamento do Vite 9 |
+| Import `react-router` (em vez de `react-router-dom`) | pacote canônico da v7; o shim morre na v8 | ~15 min (trocar imports) | junto com qualquer mexida nas rotas |
+| zod 3→4 (backend + api) | API nova de erros, perf | 2–4 h (todos os schemas) | peer do `ai` hoje aceita `^3.25.76 \|\| ^4.1.8`; migrar se exigir v4 ou num schema novo grande |
+| `@fastify/cors` 10→11 | acompanhar a linha ativa (v10 e v11 suportam Fastify 5) | 15 min | junto com o próximo bump do backend |
+| `fastify-type-provider-zod` + `setErrorHandler` global | validação tipada ponta a ponta; erros centralizados | 1–2 h | próxima rota nova no backend |
+| APIs React 19 (`useOptimistic`, Actions) | forms mais simples (hoje: TanStack `onMutate`) | oportunista | ao tocar nos forms existentes |
+| Handlers Web-standard nas Functions (`Request`/`Response`) | formato moderno da Vercel (o clássico segue suportado) | ~1 h | se alguma função nova precisar de streaming |
+| `engines: { node: "24.x" }` nos package.json | trava o runtime formalmente | 10 min | se outra máquina entrar no fluxo |
+| Code-split do bundle (chunk 604 kB > 500 kB no build) | aviso do Vite some; carga inicial menor | ~30 min (`manualChunks`) | quando o hub ganhar mais telas |
