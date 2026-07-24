@@ -24,7 +24,7 @@ foundation estilo `shadcn/create`**. Uso pessoal, single-user, Windows, tudo em 
 
 ## Começar
 
-Pré-requisitos: Node 20+, `gh` autenticado (`gh auth status`), Windows.
+Pré-requisitos: Node 24+, `gh` autenticado (`gh auth status`), Windows.
 
 ```bash
 # opção 1 — um comando
