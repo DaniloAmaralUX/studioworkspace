@@ -43,8 +43,9 @@ export function NoteNode({ id, data }: NodeProps) {
         <span className="truncate">{d.title}</span>
         <button
           type="button"
-          className="nodrag ml-auto text-muted-foreground transition-colors hover:text-destructive"
+          className="nodrag ml-auto rounded text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-2 focus-visible:outline-ring"
           onClick={() => removeNode(id)}
+          aria-label="Remover nota do canvas"
           title="Remover nota do canvas (o arquivo .md permanece)"
         >
           <Trash2 className="size-3.5" />
@@ -53,6 +54,7 @@ export function NoteNode({ id, data }: NodeProps) {
       <textarea
         className="nodrag nowheel flex-1 resize-none bg-transparent p-2 font-mono text-xs leading-relaxed outline-none"
         value={text}
+        aria-label={`Conteúdo da nota ${d.title}`}
         placeholder="# markdown…"
         onFocus={() => {
           focused.current = true

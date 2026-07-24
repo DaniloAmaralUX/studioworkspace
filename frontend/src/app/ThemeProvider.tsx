@@ -28,7 +28,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   )
 
   React.useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDark(mode))
+    const dark = isDark(mode)
+    document.documentElement.classList.toggle('dark', dark)
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+    // theme-color casa a UI do browser/janela com a página (Vercel guidelines).
+    // Hex fixo por tema (o bg computado vem em oklch, inválido na meta tag).
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', dark ? '#0b0b0e' : '#fafafa')
   }, [mode])
 
   // Reaplica o preset de cores salvo (Temas) ao carregar/qualquer rota.

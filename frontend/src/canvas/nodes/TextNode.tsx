@@ -19,8 +19,9 @@ export function TextNode({ id, data }: NodeProps) {
         <span className="truncate text-muted-foreground">Texto</span>
         <button
           type="button"
-          className="nodrag ml-auto text-muted-foreground transition-colors hover:text-destructive"
+          className="nodrag ml-auto rounded text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-2 focus-visible:outline-ring"
           onClick={() => removeNode(id)}
+          aria-label="Remover texto"
           title="Remover"
         >
           <Trash2 className="size-3.5" />
@@ -29,6 +30,7 @@ export function TextNode({ id, data }: NodeProps) {
       <textarea
         className="nodrag nowheel flex-1 resize-none bg-transparent p-2 text-sm outline-none"
         value={d.text}
+        aria-label="Texto livre"
         placeholder="anotação livre…"
         onChange={(e) => patchNodeData(id, { text: e.target.value })}
       />

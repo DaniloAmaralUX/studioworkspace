@@ -8,6 +8,7 @@ import { ProjectRow } from '@/components/ProjectRow'
 import { EmptyState } from '@/components/EmptyState'
 import { AddProjectDialog } from '@/components/AddProjectDialog'
 import { useProjects } from '@/hooks/useProjects'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import type { Project } from '@/lib/types'
 
 function sourceText(p: Project): string {
@@ -15,6 +16,7 @@ function sourceText(p: Project): string {
 }
 
 export function ProjectsScreen() {
+  useDocumentTitle('Projetos')
   const { data, isLoading, isError, error, refetch } = useProjects()
   const [q, setQ] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)

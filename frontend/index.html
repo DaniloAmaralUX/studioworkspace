@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0b0e" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <title>Studio</title>
     <script>
-      // Evita flash de tema errado: aplica .dark antes da 1ª pintura.
+      // Evita flash de tema errado: aplica .dark e color-scheme antes da 1ª pintura.
+      // color-scheme faz scrollbars e controles nativos acompanharem o tema.
       (function () {
         try {
           var m = localStorage.getItem('ps-theme-mode') || 'system'
@@ -15,6 +17,7 @@
             (m === 'system' &&
               window.matchMedia('(prefers-color-scheme: dark)').matches)
           if (dark) document.documentElement.classList.add('dark')
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
         } catch (e) {}
       })()
     </script>

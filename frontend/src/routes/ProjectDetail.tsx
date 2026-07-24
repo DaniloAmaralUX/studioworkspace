@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, GitBranch, LayoutDashboard } from 'lucide-react'
 import { useProjectGit, useProjects } from '@/hooks/useProjects'
 import { IS_CLOUD } from '@/lib/api'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { StatusBadge } from '@/components/StatusBadge'
 import { SourceBadge } from '@/components/SourceBadge'
 import { NextActionInput } from '@/components/NextActionInput'
@@ -21,6 +22,7 @@ export function ProjectDetail() {
     !!project &&
       (project.source.kind === 'local' || !!project.source.cloneDir),
   )
+  useDocumentTitle(project?.name)
 
   const back = (
     <Link

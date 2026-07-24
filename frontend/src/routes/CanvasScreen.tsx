@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useProjects } from '@/hooks/useProjects'
 import { api } from '@/lib/api'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { useCanvasDoc } from '@/canvas/useCanvasDoc'
 import { useCanvasEvents } from '@/canvas/useCanvasEvents'
 import { CanvasContext } from '@/canvas/context'
@@ -26,6 +27,7 @@ export default function CanvasScreen() {
   const { id = '' } = useParams()
   const { data: projects } = useProjects()
   const project = projects?.find((p) => p.id === id)
+  useDocumentTitle(project ? `${project.name} · Canvas` : 'Canvas')
   const qc = useQueryClient()
   const doc = useCanvasDoc(id)
 
@@ -90,6 +92,17 @@ export default function CanvasScreen() {
       <div className="relative flex-1">
         <CanvasContext.Provider value={ctx}>
           <Toolbar onAddNote={addNote} onAddText={addText} />
+          {doc.loaded && doc.nodes.length === 0 && (
+            <div className="pointer-events-none absolute inset-0 z-[5] grid place-items-center">
+              <div className="max-w-xs text-center">
+                <p className="text-sm font-medium">Canvas vazio</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Comece adicionando uma <strong>Nota</strong> ou um{' '}
+                  <strong>Texto</strong> pela barra no canto superior esquerdo.
+                </p>
+              </div>
+            </div>
+          )}
           <ReactFlow
             nodes={doc.nodes}
             edges={doc.edges}
