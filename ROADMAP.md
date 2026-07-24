@@ -69,6 +69,25 @@ compartilháveis.
 
 ---
 
+## Modo Maestri — canvas de orquestração (branch `canvas`, desktop-only)
+
+Paridade funcional com o Maestri (themaestri.app), reimplementado em web/Windows. Canvas React Flow +
+terminais PTY reais (Claude Code CLI) + notas markdown vivas + conexões agente↔agente + Ombro (IA) +
+rotinas + floors (git worktrees). Vive só na branch `canvas`, gated `!IS_CLOUD` (PTY não roda em serverless).
+
+- [x] **M0** — Branch + rota `/projects/:id/canvas` (React Flow vazio) + spikes de PTY (`@lydell/node-pty`) e WebSocket (`@fastify/websocket`).
+- [ ] **M1** — Layout persistido por projeto (`.workspace/canvas/`) + notas markdown vivas (`fs.watch`).
+- [ ] **M2** — Terminais PTY reais (xterm.js + node-pty via WS, ring buffer + reattach).
+- [ ] **M3** — Claude Code CLI global + papéis de agente.
+- [ ] **M4** — Conexões terminal↔terminal (encaminhar output→stdin) e terminal↔nota.
+- [ ] **M5** — Grupos, Tidy, minimapa, atalhos, File Tree.
+- [ ] **M6** — Ombro (resumo + próxima ação via AI Gateway).
+- [ ] **M7** — Rotinas (prompts agendados).
+- [ ] **M8** — Floors (um canvas por git worktree).
+- [ ] **M9** — Desenho à mão livre + polish.
+
+---
+
 ## Modernizações adiadas (auditoria de fundação, 2026-07-24)
 
 Auditoria com Context7 confirmou a fundação em versão de ponta (defasagens reais corrigidas:

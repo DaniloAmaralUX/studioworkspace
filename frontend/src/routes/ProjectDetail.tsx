@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, GitBranch } from 'lucide-react'
+import { ArrowLeft, GitBranch, LayoutDashboard } from 'lucide-react'
 import { useProjectGit, useProjects } from '@/hooks/useProjects'
+import { IS_CLOUD } from '@/lib/api'
 import { StatusBadge } from '@/components/StatusBadge'
 import { SourceBadge } from '@/components/SourceBadge'
 import { NextActionInput } from '@/components/NextActionInput'
@@ -56,7 +57,18 @@ export function ProjectDetail() {
             <SourceBadge source={project.source} />
           </div>
         </div>
-        <StatusBadge status={project.status} />
+        <div className="flex items-center gap-2">
+          {!IS_CLOUD &&
+            (project.source.kind === 'local' || project.source.cloneDir) && (
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/projects/${project.id}/canvas`}>
+                  <LayoutDashboard className="size-3.5" />
+                  Canvas
+                </Link>
+              </Button>
+            )}
+          <StatusBadge status={project.status} />
+        </div>
       </div>
 
       <Tabs defaultValue="overview">
