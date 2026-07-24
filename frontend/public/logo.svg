@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Logo do Studio: tile escuro + domo de vidro com gradiente frio->quente -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b2b31"/>
+      <stop offset="1" stop-color="#141417"/>
+    </linearGradient>
+    <linearGradient id="dome" x1="0.1" y1="0.2" x2="0.95" y2="0.8">
+      <stop offset="0" stop-color="#9db9de"/>
+      <stop offset="0.45" stop-color="#d3cdc9"/>
+      <stop offset="0.75" stop-color="#e8b184"/>
+      <stop offset="1" stop-color="#d98e63"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.42" cy="0.22" r="0.75">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#3a2c22" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="96" height="96" rx="24" fill="url(#tile)"/>
+  <rect x="2.6" y="2.6" width="94.8" height="94.8" rx="23.4" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="1.2"/>
+  <path d="M 19 57 A 31 31 0 1 1 81 57 Q 50 76 19 57 Z" fill="url(#dome)"/>
+  <path d="M 19 57 A 31 31 0 1 1 81 57 Q 50 76 19 57 Z" fill="url(#glow)"/>
+  <path d="M 19 57 A 31 31 0 1 1 81 57 Q 50 76 19 57 Z" fill="url(#shade)"/>
+</svg>

@@ -1,5 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { FolderKanban, Palette, LayoutTemplate, Github, Boxes } from 'lucide-react'
+import {
+  FolderKanban,
+  Palette,
+  LayoutTemplate,
+  Github,
+  BookOpen,
+} from 'lucide-react'
+import { StudioLogo } from '@/components/StudioLogo'
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +25,7 @@ const nav = [
   { title: 'Projetos', url: '/', icon: FolderKanban, end: true },
   { title: 'Temas', url: '/themes', icon: Palette, end: false },
   { title: 'Templates', url: '/templates', icon: LayoutTemplate, end: false },
+  { title: 'Como usar', url: '/como-usar', icon: BookOpen, end: false },
 ]
 
 export function AppSidebar() {
@@ -29,9 +37,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <NavLink to="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Boxes className="size-4" />
-                </div>
+                <StudioLogo className="size-8 shrink-0 rounded-lg" />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Studio</span>
                   <span className="truncate text-xs text-muted-foreground">
