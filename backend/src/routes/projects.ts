@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { promises as fs } from 'node:fs'
-import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
+import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import {
   addProject,
   findBySource,
@@ -12,6 +12,7 @@ import {
 } from '../core/projectIndex'
 import { detectStack } from '../core/stackDetect'
 import { gitInfo } from '../core/git'
+import { idParams } from '../lib/schemas'
 
 const patchSchema = z.object({
   name: z.string().min(1).optional(),
@@ -27,80 +28,81 @@ const localSchema = z.object({
   name: z.string().min(1).optional(),
 })
 
-export async function projectRoutes(app: FastifyInstance): Promise<void> {
+export const projectRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get('/api/projects', async () => {
     return await loadProjects()
   })
 
   // Associa uma pasta local (não copia/move nada).
-  app.post('/api/projects/local', async (req, reply) => {
-    const parsed = localSchema.safeParse(req.body)
-    if (!parsed.success) {
-      return reply
-        .code(400)
-        .send({ error: { code: 'invalid_body', message: parsed.error.message } })
-    }
-    const abs = path.resolve(parsed.data.path)
-    const stat = await fs.stat(abs).catch(() => null)
-    if (!stat || !stat.isDirectory()) {
-      return reply.code(400).send({
-        error: { code: 'not_a_dir', message: 'Caminho não é uma pasta existente.' },
-      })
-    }
-    const source = { kind: 'local', path: abs } as const
-    if (await findBySource(source)) {
-      return reply
-        .code(409)
-        .send({ error: { code: 'duplicate', message: 'Essa pasta já está no hub.' } })
-    }
-    const stack = await detectStack(abs)
-    const name = parsed.data.name?.trim() || path.basename(abs)
-    const project = await addProject({ name, source, stack })
-    return reply.code(201).send(project)
-  })
+  app.post(
+    '/api/projects/local',
+    { schema: { body: localSchema } },
+    async (req, reply) => {
+      const abs = path.resolve(req.body.path)
+      const stat = await fs.stat(abs).catch(() => null)
+      if (!stat || !stat.isDirectory()) {
+        return reply.code(400).send({
+          error: { code: 'not_a_dir', message: 'Caminho não é uma pasta existente.' },
+        })
+      }
+      const source = { kind: 'local', path: abs } as const
+      if (await findBySource(source)) {
+        return reply
+          .code(409)
+          .send({ error: { code: 'duplicate', message: 'Essa pasta já está no hub.' } })
+      }
+      const stack = await detectStack(abs)
+      const name = req.body.name?.trim() || path.basename(abs)
+      const project = await addProject({ name, source, stack })
+      return reply.code(201).send(project)
+    },
+  )
 
-  app.patch('/api/projects/:id', async (req, reply) => {
-    const { id } = req.params as { id: string }
-    const parsed = patchSchema.safeParse(req.body)
-    if (!parsed.success) {
-      return reply
-        .code(400)
-        .send({ error: { code: 'invalid_body', message: parsed.error.message } })
-    }
-    const updated = await patchProject(id, parsed.data)
-    if (!updated) {
-      return reply
-        .code(404)
-        .send({ error: { code: 'not_found', message: 'Projeto não encontrado' } })
-    }
-    return updated
-  })
+  app.patch(
+    '/api/projects/:id',
+    { schema: { params: idParams, body: patchSchema } },
+    async (req, reply) => {
+      const updated = await patchProject(req.params.id, req.body)
+      if (!updated) {
+        return reply
+          .code(404)
+          .send({ error: { code: 'not_found', message: 'Projeto não encontrado' } })
+      }
+      return updated
+    },
+  )
 
-  app.delete('/api/projects/:id', async (req, reply) => {
-    const { id } = req.params as { id: string }
-    const ok = await removeProject(id)
-    if (!ok) {
-      return reply
-        .code(404)
-        .send({ error: { code: 'not_found', message: 'Projeto não encontrado' } })
-    }
-    return { ok: true }
-  })
+  app.delete(
+    '/api/projects/:id',
+    { schema: { params: idParams } },
+    async (req, reply) => {
+      const ok = await removeProject(req.params.id)
+      if (!ok) {
+        return reply
+          .code(404)
+          .send({ error: { code: 'not_found', message: 'Projeto não encontrado' } })
+      }
+      return { ok: true }
+    },
+  )
 
   // Lente "Engineering": status git da pasta local.
-  app.get('/api/projects/:id/git', async (req, reply) => {
-    const { id } = req.params as { id: string }
-    const project = await getProject(id)
-    if (!project) {
-      return reply
-        .code(404)
-        .send({ error: { code: 'not_found', message: 'Projeto não encontrado' } })
-    }
-    const target =
-      project.source.kind === 'local' ? project.source.path : project.source.cloneDir
-    if (!target) {
-      return { isRepo: false, reason: 'github-not-cloned' }
-    }
-    return await gitInfo(target)
-  })
+  app.get(
+    '/api/projects/:id/git',
+    { schema: { params: idParams } },
+    async (req, reply) => {
+      const project = await getProject(req.params.id)
+      if (!project) {
+        return reply
+          .code(404)
+          .send({ error: { code: 'not_found', message: 'Projeto não encontrado' } })
+      }
+      const target =
+        project.source.kind === 'local' ? project.source.path : project.source.cloneDir
+      if (!target) {
+        return { isRepo: false, reason: 'github-not-cloned' }
+      }
+      return await gitInfo(target)
+    },
+  )
 }

@@ -1,29 +1,8 @@
 import './env'
-import Fastify from 'fastify'
-import cors from '@fastify/cors'
-import { HOST, PORT, FRONTEND_ORIGIN } from './config'
-import { healthRoutes } from './routes/health'
-import { projectRoutes } from './routes/projects'
-import { openRoutes } from './routes/open'
-import { githubRoutes } from './routes/github'
-import { foundationRoutes } from './routes/foundation'
-import { aiRoutes } from './routes/ai'
-import { stampRoutes } from './routes/stamp'
-import { scaffoldRoutes } from './routes/scaffold'
+import { HOST, PORT } from './config'
+import { buildApp } from './app'
 
-const app = Fastify({ logger: true })
-
-// Só a origem do frontend local pode falar com a API.
-await app.register(cors, { origin: FRONTEND_ORIGIN })
-
-await app.register(healthRoutes)
-await app.register(projectRoutes)
-await app.register(openRoutes)
-await app.register(githubRoutes)
-await app.register(foundationRoutes)
-await app.register(aiRoutes)
-await app.register(stampRoutes)
-await app.register(scaffoldRoutes)
+const app = await buildApp()
 
 try {
   await app.listen({ host: HOST, port: PORT })
