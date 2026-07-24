@@ -8,6 +8,7 @@ import { generateText, gateway } from 'ai'
 import { getProject } from '../../_lib/kv.js'
 import { methodNotAllowed, sendError } from '../../_lib/http.js'
 import { repoCommits, repoReadme } from '../../_lib/github.js'
+import { resolveGithubToken } from '../../_lib/auth.js'
 import type { Project } from '../../_lib/types.js'
 
 const AI_MODEL = process.env.PS_AI_MODEL ?? 'anthropic/claude-sonnet-4.6'
@@ -87,11 +88,12 @@ export default async function handler(
 
     let commits: string[] = []
     let readme: string | null = null
-    if (project.source.kind === 'github') {
+    const token = resolveGithubToken(req)
+    if (project.source.kind === 'github' && token) {
       const nwo = project.source.nameWithOwner
       ;[commits, readme] = await Promise.all([
-        repoCommits(nwo),
-        repoReadme(nwo),
+        repoCommits(token, nwo),
+        repoReadme(token, nwo),
       ])
     }
 

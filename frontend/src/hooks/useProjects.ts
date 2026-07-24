@@ -16,6 +16,25 @@ export function useLaunchers() {
   return useQuery({ queryKey: ['launchers'], queryFn: api.getLaunchers })
 }
 
+export function useGithubStatus() {
+  return useQuery({
+    queryKey: ['github-status'],
+    queryFn: api.githubStatus,
+    staleTime: 30_000,
+  })
+}
+
+export function useGithubLogout() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: api.githubLogout,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['github-status'] })
+      void qc.invalidateQueries({ queryKey: ['github-repos'] })
+    },
+  })
+}
+
 export function usePatchProject() {
   const qc = useQueryClient()
   return useMutation({

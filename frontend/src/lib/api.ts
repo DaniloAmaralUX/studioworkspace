@@ -11,6 +11,9 @@ const BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:5178/api'
 /** Variante cloud = API same-origin (VITE_API_BASE=/api na Vercel). */
 export const IS_CLOUD = BASE.startsWith('/')
 
+/** Base da API (para links de página inteira, ex.: /api/auth/login). */
+export const API_BASE = BASE
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
@@ -66,8 +69,18 @@ export type FoundationResponse = {
   shadcnCommand: string | null
 }
 
+export type GithubStatus = {
+  authed: boolean
+  login?: string
+  via?: 'oauth' | 'pat' | null
+  oauthAvailable?: boolean
+  error?: string
+}
+
 export const api = {
   health: () => req<{ ok: boolean }>('/health'),
+  githubStatus: () => req<GithubStatus>('/github/status'),
+  githubLogout: () => req<{ ok: true }>('/auth/logout', { method: 'POST' }),
   listProjects: () => req<Project[]>('/projects'),
   patchProject: (id: string, patch: ProjectPatch) =>
     req<Project>(`/projects/${id}`, {

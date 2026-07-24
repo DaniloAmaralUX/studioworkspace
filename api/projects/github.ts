@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { findBySource, putProject } from '../_lib/kv.js'
 import { internalError, methodNotAllowed, sendError } from '../_lib/http.js'
 import { repoView } from '../_lib/github.js'
+import { resolveGithubToken } from '../_lib/auth.js'
 import type { Project } from '../_lib/types.js'
 
 const addSchema = z.object({
@@ -35,7 +36,9 @@ export default async function handler(
     let lastActivityAt: string | undefined
     let stack: string[] = []
     try {
-      const meta = await repoView(nameWithOwner)
+      const token = resolveGithubToken(req)
+      const meta = token ? await repoView(token, nameWithOwner) : null
+      if (!meta) throw new Error('sem credencial')
       lastActivityAt = meta.pushedAt ?? undefined
       if (meta.primaryLanguage) stack = [meta.primaryLanguage.toLowerCase()]
     } catch {

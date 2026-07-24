@@ -5,8 +5,8 @@ import {
   LayoutTemplate,
   BookOpen,
 } from 'lucide-react'
-import { GithubIcon } from '@/components/GithubIcon'
 import { StudioLogo } from '@/components/StudioLogo'
+import { GithubConnect } from '@/components/GithubConnect'
 import {
   Sidebar,
   SidebarContent,
@@ -80,14 +80,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton disabled tooltip="Conectar GitHub chega na R3">
-              <GithubIcon />
-              <span>Conectar GitHub</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <GithubConnect />
       </SidebarFooter>
 
       <SidebarRail />

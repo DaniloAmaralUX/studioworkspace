@@ -1,6 +1,7 @@
 // Cliente GitHub da variante cloud (substitui o `gh` CLI do desktop).
-// Credencial: GITHUB_TOKEN (PAT fine-grained read-only) em env var da Vercel —
-// nunca em código, log ou KV (PLANO2.md, emenda de charter).
+// Credencial passada por parâmetro (token): vem da sessão OAuth (cookie) ou,
+// como fallback, do PAT GITHUB_TOKEN em env var — resolvido em _lib/auth.ts.
+// Nunca em código, log ou KV (PLANO2.md, emenda de charter).
 // fetch nativo do Node 24; sem dependência de Octokit para manter as funções leves.
 
 const API = 'https://api.github.com'
@@ -18,12 +19,11 @@ export class GithubError extends Error {
   }
 }
 
-async function gh<T>(path: string): Promise<T> {
-  const token = process.env.GITHUB_TOKEN
+async function gh<T>(path: string, token: string): Promise<T> {
   if (!token) {
     throw new GithubError(
       503,
-      'GITHUB_TOKEN não configurado: cadastre o PAT nas env vars do projeto.',
+      'Sem credencial do GitHub: entre com GitHub ou cadastre o PAT nas env vars.',
     )
   }
   const res = await fetch(`${API}${path}`, {
@@ -47,8 +47,8 @@ async function gh<T>(path: string): Promise<T> {
 }
 
 /** Quem é o dono do token (valida autenticação). */
-export async function viewer(): Promise<{ login: string }> {
-  return gh<{ login: string }>('/user')
+export async function viewer(token: string): Promise<{ login: string }> {
+  return gh<{ login: string }>('/user', token)
 }
 
 export type GithubRepo = {
@@ -78,26 +78,32 @@ function normalize(r: RawRepo): GithubRepo {
 }
 
 /** Repos do dono do token, mais recentes primeiro (espelha `gh repo list`). */
-export async function repoList(limit = 100): Promise<GithubRepo[]> {
+export async function repoList(token: string, limit = 100): Promise<GithubRepo[]> {
   const raw = await gh<RawRepo[]>(
     `/user/repos?sort=pushed&direction=desc&per_page=${Math.min(limit, 100)}`,
+    token,
   )
   return raw.map(normalize)
 }
 
 /** Metadados de um repo (espelha `gh repo view`). */
-export async function repoView(nameWithOwner: string): Promise<GithubRepo> {
-  return normalize(await gh<RawRepo>(`/repos/${nameWithOwner}`))
+export async function repoView(
+  token: string,
+  nameWithOwner: string,
+): Promise<GithubRepo> {
+  return normalize(await gh<RawRepo>(`/repos/${nameWithOwner}`, token))
 }
 
 /** Assuntos dos commits recentes (mais novo primeiro). Best-effort: [] se falhar. */
 export async function repoCommits(
+  token: string,
   nameWithOwner: string,
   limit = 12,
 ): Promise<string[]> {
   try {
     const raw = await gh<{ commit: { message: string } }[]>(
       `/repos/${nameWithOwner}/commits?per_page=${Math.min(limit, 50)}`,
+      token,
     )
     return raw
       .map((c) => c.commit.message.split('\n')[0]?.trim() ?? '')
@@ -109,10 +115,10 @@ export async function repoCommits(
 
 /** Trecho do README (raw). Best-effort: null se não existir/falhar. */
 export async function repoReadme(
+  token: string,
   nameWithOwner: string,
   maxChars = 2000,
 ): Promise<string | null> {
-  const token = process.env.GITHUB_TOKEN
   if (!token) return null
   try {
     const res = await fetch(`${API}/repos/${nameWithOwner}/readme`, {
