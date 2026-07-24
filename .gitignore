@@ -40,3 +40,6 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Context7: .mcp.json contém CONTEXT7_API_KEY em texto puro (regra de ouro #2)
+.mcp.json
