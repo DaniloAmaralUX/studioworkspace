@@ -12,6 +12,11 @@ build/
 .env
 .env.*
 !.env.example
+# exceção: não tem segredo, só VITE_API_BASE=/api (Studio Cloud, PLANO2.md)
+!frontend/.env.production
+
+# Vercel CLI (link local do projeto studio-cloud)
+.vercel/
 
 # Dados locais do Workspace Service
 projects.json

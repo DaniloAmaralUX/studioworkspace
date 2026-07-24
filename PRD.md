@@ -142,6 +142,10 @@ Agente embutido/streaming, agentes em paralelo, colaboração/multiusuário, syn
 marketplace, canvas estilo Figma, empacotamento desktop, importar automaticamente **todos** os repos
 (o usuário escolhe quais entram), dezenas de templates.
 
+> **Emenda (2026-07-24, [`PLANO2.md`](./PLANO2.md)):** para a variante **Studio Cloud**, "sync em
+> nuvem" (persistência em KV na Vercel) e **IA via AI Gateway** deixam de estar fora do escopo.
+> O restante desta lista permanece fora de escopo nas duas variantes.
+
 ## 11. Métrica principal
 
 > Consigo achar/abrir um projeto e começar a trabalhar **sem** abrir PowerShell, procurar conversa
