@@ -184,6 +184,10 @@
         <a href="#como-usar">Como usar</a>
         <a href="#atalhos">Atalhos</a>
       </nav>
+      <div class="group-label">Nuvem</div>
+      <nav>
+        <a href="#cloud">Studio Cloud</a>
+      </nav>
       <div class="group-label">Estado</div>
       <nav>
         <a href="#roadmap">Roadmap</a>
@@ -225,8 +229,8 @@
 
       <h2 id="regras">Regras de ouro (não violar)</h2>
       <ol>
-        <li><strong>Local-only.</strong> Servido só em <code>127.0.0.1</code>. Nunca em <code>0.0.0.0</code>, nunca porta pública.</li>
-        <li><strong>Nunca guardar tokens.</strong> GitHub via <code>gh</code> CLI já autenticado. Não copiar nem persistir credenciais.</li>
+        <li><strong>Local-only (desktop).</strong> Servido só em <code>127.0.0.1</code>. Nunca em <code>0.0.0.0</code>, nunca porta pública. <em>Emenda:</em> a variante <a href="#cloud">Studio Cloud</a> roda na Vercel — sempre atrás de proteção, nunca exposta por acidente.</li>
+        <li><strong>Nunca guardar tokens.</strong> Desktop: GitHub via <code>gh</code> CLI já autenticado. Cloud: PAT fine-grained <em>read-only</em> que vive só como env var na Vercel — nunca em código, log ou KV.</li>
         <li><strong>Não mover arquivos.</strong> Associar pasta ≠ copiar. Remover do hub ≠ apagar. Confirmar antes de clonar ou abrir.</li>
         <li><strong>Sem agente embutido.</strong> "Trabalhar" = abrir no Claude Code Desktop / Terminal / Explorer. O CLI <code>claude</code>/<code>codex</code> não está no PATH aqui.</li>
         <li><strong>Fatias verticais.</strong> Uma coisa por vez, ponta a ponta. Não construir o que está em "Fora do escopo".</li>
@@ -317,6 +321,33 @@ cd frontend && npm install && npm run dev   # 127.0.0.1:5177</code></pre>
         </div>
       </div>
 
+      <h2 id="cloud">Studio Cloud (variante na Vercel)</h2>
+      <p class="lede">O mesmo hub, no ar: <a href="https://studioworkspace-mauve.vercel.app">studioworkspace-mauve.vercel.app</a>. Mesmo repositório, mesmo frontend — o backend vira funções serverless em <code>api/</code> e os dados vivem num Redis (Upstash).</p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="title">O que funciona na nuvem</div>
+          <div class="desc">Hub de projetos (KV) · repos do GitHub (PAT read-only) · próxima ação com IA (AI Gateway) · galeria de temas · Foundation salva no hub</div>
+        </div>
+        <div class="card">
+          <div class="title">O que é só do desktop</div>
+          <div class="desc">Abrir no Claude/VS Code/Explorer · clone sob demanda · scaffold de projeto novo · carimbo (AGENTS/CLAUDE/MCP) · status git local</div>
+        </div>
+        <div class="card">
+          <div class="title">Meu Registry</div>
+          <div class="desc">Os 36 temas são um registry shadcn real em <code>/r/*.json</code> — em qualquer projeto: <code>npx shadcn@latest add &lt;url do tema&gt;</code></div>
+        </div>
+        <div class="card">
+          <div class="title">Como deploya</div>
+          <div class="desc"><strong>push na <code>main</code> = deploy.</strong> Por isso commits ficam locais até decidir publicar. <code>vercel.json</code> na raiz é a única fonte de config.</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <span class="icon">!</span>
+        <p><strong>Pendência de segurança:</strong> ativar <em>Vercel Authentication → All Deployments</em> no dashboard (a URL hoje está pública). Decidir antes se o registry <code>/r/</code> deve continuar aberto.</p>
+      </div>
+
       <h2 id="roadmap">Onde estamos</h2>
       <p>Entrega em fatias verticais. Cada uma é usável de ponta a ponta.</p>
       <ul class="roadmap">
@@ -327,6 +358,10 @@ cd frontend && npm install && npm run dev   # 127.0.0.1:5177</code></pre>
         <li><span class="id">R4</span><span class="name">Detalhe do projeto + lentes Engineering/Design</span><span class="badge ok">feita</span></li>
         <li><span class="id">R5</span><span class="name">Configurador de Foundation + área Templates</span><span class="badge ok">feita</span></li>
         <li><span class="id">R6</span><span class="name">Opener <code>claude://</code> + clone sob demanda</span><span class="badge ok">feita</span></li>
+        <li><span class="id">C0–C3</span><span class="name">Studio Cloud: shell na Vercel + hub no KV + GitHub via PAT + IA (AI Gateway)</span><span class="badge ok">feita</span></li>
+        <li><span class="id">CR</span><span class="name">Meu Registry: 36 temas shadcn servidos em <code>/r/*.json</code></span><span class="badge ok">feita</span></li>
+        <li><span class="id">C4</span><span class="name">Foundation no KV (configurador na nuvem)</span><span class="badge ok">feita</span></li>
+        <li><span class="id">C6</span><span class="name">OAuth App no lugar do PAT</span><span class="badge">próxima</span></li>
       </ul>
 
       <h2 id="o-que-nao-e">O que isto NÃO é</h2>
@@ -334,7 +369,7 @@ cd frontend && npm install && npm run dev   # 127.0.0.1:5177</code></pre>
       <ul>
         <li>Não é IDE, terminal, Figma, Claude Code nem Codex — é o que <em>conduz</em> entre eles.</li>
         <li>Não tem agente embutido, streaming, nem agentes em paralelo.</li>
-        <li>Não é multiusuário, não sincroniza com nuvem, não tem billing, não tem marketplace.</li>
+        <li>Não é multiusuário, não tem billing, não tem marketplace. (A <a href="#cloud">Studio Cloud</a> existe, mas é o <em>meu</em> hub no ar — single-user, atrás de proteção.)</li>
         <li>Não importa automaticamente <em>todos</em> os repos — você escolhe quais entram.</li>
         <li>Não é um canvas estilo Figma nem um empacotamento desktop.</li>
       </ul>
