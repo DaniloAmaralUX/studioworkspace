@@ -33,9 +33,12 @@ O deploy contradiz 3 regras de ouro do `CLAUDE.md`/`PRD.md`. A emenda é **escop
 
 ## Arquitetura-alvo
 
-- **1 projeto Vercel** (`studio-cloud`), deploy via Git do repo `studioworkspace`, **Root Directory = `frontend/`**, preset Vite, output `dist`.
-- Funções em `frontend/api/` (1 arquivo = 1 função). Mesma origem ⇒ zero CORS.
-- `frontend/api/_lib/` = types/zod/lógica pura portada do backend (fonte: `backend/src/lib/types.ts`, `core/foundation.ts`). Fastify **não** migra.
+- **1 projeto Vercel** (`studio-cloud`), deploy via Git do repo `studioworkspace`, **Root Directory = raiz do repo**.
+  *(Ajuste na execução da Fatia 0: o CLI não configura Root Directory; deployar pela raiz com
+  `vercel.json` fazendo `cd frontend` elimina qualquer dependência do dashboard — e `api/` fica
+  ao lado de `backend/` e `frontend/`, mais coerente no monorepo.)*
+- Funções em **`api/` na raiz** (1 arquivo = 1 função). Mesma origem ⇒ zero CORS.
+- `api/_lib/` = types/zod/lógica pura portada do backend (fonte: `backend/src/lib/types.ts`, `core/foundation.ts`). Fastify **não** migra.
 - **Persistência: Upstash Redis** (Marketplace). Hashes: `ps:projects` (id→Project), `ps:templates`, `ps:foundation:<id>`.
 - `vercel.json`: rewrite `/((?!api/).*)` → `/index.html`; `functions.maxDuration: 60`.
 - Env: `VITE_API_BASE=/api` · `GITHUB_TOKEN` (PAT) · `KV_REST_API_*` (auto) · `PS_AI_MODEL` (opcional) · AI Gateway via OIDC (nada a configurar).

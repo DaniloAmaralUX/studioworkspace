@@ -37,3 +37,6 @@ Thumbs.db
 
 # Config local do Claude Code (não faz parte da ferramenta)
 .claude/settings.local.json
+
+.vercel
+.env*
