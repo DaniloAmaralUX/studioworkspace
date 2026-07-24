@@ -86,6 +86,10 @@ rotinas + floors (git worktrees). Vive só na branch `canvas`, gated `!IS_CLOUD`
 - [ ] **M8** — Floors (um canvas por git worktree).
 - [ ] **M9** — Desenho à mão livre + polish.
 
+### App desktop (Electron) — empacotar como aplicativo instalável
+- [x] **A0** — Shell Electron: `desktop/` sobe o Fastify (servindo o frontend na mesma origem via `@fastify/static`) e abre a janela. Backend empacotado com esbuild.
+- [~] **A1** — Instalável no Windows: app roda instalado em `%LOCALAPPDATA%\Programs\Studio` + atalho no Menu Iniciar (aparece na busca). Instalador NSIS (`electron-builder`) pendente — bloqueado por lock de AV/sandbox na extração do 7zip.
+
 ---
 
 ## Modernizações adiadas (auditoria de fundação, 2026-07-24)

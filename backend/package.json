@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.2",
+    "@fastify/static": "^10.1.2",
     "@fastify/websocket": "^11.3.0",
     "@lydell/node-pty": "^1.2.0-beta.12",
     "ai": "^7.0.37",

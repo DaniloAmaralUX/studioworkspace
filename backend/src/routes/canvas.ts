@@ -1,6 +1,5 @@
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { z } from 'zod'
-import { FRONTEND_ORIGIN } from '../config'
 import { getProject } from '../core/projectIndex'
 import {
   createNote,
@@ -65,6 +64,19 @@ function badBody(reply: FastifyReply, message: string): void {
   reply.code(400).send({ error: { code: 'invalid_body', message } })
 }
 
+// WS não sofre CORS do browser — validamos a origem no handshake. Aceita
+// qualquer origem local (5177 no dev, 5178 no app empacotado); o server já
+// só escuta 127.0.0.1. Sem origem (testes injectWS) passa.
+function isLocalOrigin(origin?: string): boolean {
+  if (!origin) return true
+  try {
+    const host = new URL(origin).hostname
+    return host === '127.0.0.1' || host === 'localhost'
+  } catch {
+    return false
+  }
+}
+
 // Resolve o dir do projeto em disco; responde 404/400 e retorna null se não der.
 async function requireDir(
   id: string,
@@ -88,8 +100,7 @@ async function requireDir(
 export async function canvasRoutes(app: FastifyInstance): Promise<void> {
   // Spike M0: echo (mantido como sonda de transporte).
   app.get('/api/canvas/ws-echo', { websocket: true }, (socket, req) => {
-    const origin = req.headers.origin
-    if (origin && origin !== FRONTEND_ORIGIN) return socket.close(1008, 'origem')
+    if (!isLocalOrigin(req.headers.origin)) return socket.close(1008, 'origem')
     socket.on('message', (data: Buffer) => socket.send(data.toString()))
   })
 
@@ -99,8 +110,7 @@ export async function canvasRoutes(app: FastifyInstance): Promise<void> {
     '/api/projects/:id/canvas/events',
     { websocket: true },
     async (socket, req) => {
-      const origin = req.headers.origin
-      if (origin && origin !== FRONTEND_ORIGIN) return socket.close(1008, 'origem')
+      if (!isLocalOrigin(req.headers.origin)) return socket.close(1008, 'origem')
       const { id } = req.params as { id: string }
       const project = await getProject(id)
       const dir = project ? resolveProjectDir(project) : null

@@ -18,8 +18,12 @@ import { stampRoutes } from './routes/stamp'
 import { scaffoldRoutes } from './routes/scaffold'
 import { canvasRoutes } from './routes/canvas'
 
-/** Monta o app completo sem dar listen — usado pelo server e pelos testes (inject). */
-export async function buildApp({ logger = true }: { logger?: boolean } = {}) {
+/** Monta o app completo sem dar listen — usado pelo server, pelos testes (inject)
+ *  e pelo app Electron (serveStatic serve o frontend buildado na mesma origem). */
+export async function buildApp({
+  logger = true,
+  serveStatic,
+}: { logger?: boolean; serveStatic?: string } = {}) {
   const app = Fastify({ logger }).withTypeProvider<ZodTypeProvider>()
   app.setValidatorCompiler(validatorCompiler)
   app.setSerializerCompiler(serializerCompiler)
@@ -59,6 +63,21 @@ export async function buildApp({ logger = true }: { logger?: boolean } = {}) {
   await app.register(stampRoutes)
   await app.register(scaffoldRoutes)
   await app.register(canvasRoutes)
+
+  // App empacotado (Electron): serve o frontend buildado na MESMA origem da API
+  // (127.0.0.1:5178), evitando CORS. Fallback SPA para rotas do client-router.
+  if (serveStatic) {
+    const fastifyStatic = (await import('@fastify/static')).default
+    await app.register(fastifyStatic, { root: serveStatic, wildcard: false })
+    app.setNotFoundHandler((req, reply) => {
+      if (req.url.startsWith('/api')) {
+        return reply
+          .code(404)
+          .send({ error: { code: 'not_found', message: 'Rota não encontrada' } })
+      }
+      return reply.sendFile('index.html')
+    })
+  }
 
   return app
 }

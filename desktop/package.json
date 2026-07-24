@@ -1,0 +1,50 @@
+{
+  "name": "studio-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Studio — app desktop (Electron): hub + canvas de orquestração",
+  "main": "main.cjs",
+  "scripts": {
+    "build:backend": "node build-backend.mjs",
+    "build:frontend": "npm --prefix ../frontend run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "start": "electron .",
+    "dev": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.1"
+  },
+  "build": {
+    "appId": "com.danilo.studio",
+    "productName": "Studio",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../frontend/dist",
+        "to": "frontend-dist"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Studio"
+    }
+  }
+}
