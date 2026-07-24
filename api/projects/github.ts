@@ -1,11 +1,12 @@
 // POST /api/projects/github — adiciona um repo GitHub ao hub (mesmo contrato do
-// desktop). Sem `gh` na nuvem: os metadados (stack, última atividade) chegam na
-// Fatia 2 via Octokit; aqui o projeto entra com o essencial.
+// desktop). Metadados via API do GitHub (Fatia 2): última atividade e linguagem
+// principal. Se o GitHub falhar, o projeto entra mesmo assim com o essencial.
 import { randomUUID } from 'node:crypto'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { z } from 'zod'
 import { findBySource, putProject } from '../_lib/kv.js'
 import { internalError, methodNotAllowed, sendError } from '../_lib/http.js'
+import { repoView } from '../_lib/github.js'
 import type { Project } from '../_lib/types.js'
 
 const addSchema = z.object({
@@ -30,6 +31,16 @@ export default async function handler(
     if (await findBySource(source)) {
       return sendError(res, 409, 'duplicate', 'Esse repo já está no hub.')
     }
+    // Metadados best-effort — indisponibilidade do GitHub não bloqueia o add.
+    let lastActivityAt: string | undefined
+    let stack: string[] = []
+    try {
+      const meta = await repoView(nameWithOwner)
+      lastActivityAt = meta.pushedAt ?? undefined
+      if (meta.primaryLanguage) stack = [meta.primaryLanguage.toLowerCase()]
+    } catch {
+      /* segue sem metadados */
+    }
     const now = new Date().toISOString()
     const project: Project = {
       id: randomUUID(),
@@ -37,7 +48,8 @@ export default async function handler(
       source,
       status: 'planning',
       tags: [],
-      stack: [],
+      stack,
+      lastActivityAt,
       createdAt: now,
       updatedAt: now,
     }
