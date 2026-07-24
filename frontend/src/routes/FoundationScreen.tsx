@@ -8,6 +8,7 @@ import {
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Check, Copy } from 'lucide-react'
 import { useFoundation, usePutFoundation, useProjects } from '@/hooks/useProjects'
+import { IS_CLOUD } from '@/lib/api'
 import { themePresets } from '@/lib/themePresets'
 import type { Density, Foundation } from '@/lib/types'
 import { Button } from '@/components/ui/button'
@@ -75,7 +76,10 @@ export function FoundationScreen() {
   const { data: projects } = useProjects()
   const project = projects?.find((p) => p.id === id)
   const isLocal = !!project && project.source.kind === 'local'
-  const existing = useFoundation(id, isLocal)
+  // Desktop: só projeto local (arquivos em .workspace/). Cloud: qualquer
+  // projeto do hub (foundation vive no KV).
+  const canConfigure = isLocal || (IS_CLOUD && !!project)
+  const existing = useFoundation(id, canConfigure)
   const save = usePutFoundation(id)
 
   const [f, setF] = useState<Foundation>(DEFAULT_FOUNDATION)
@@ -130,12 +134,18 @@ export function FoundationScreen() {
         Configurar Foundation
       </h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        Escolha as bases; salvar grava <code>.workspace/foundation.json</code> e{' '}
-        <code>.workspace/DESIGN.md</code> no projeto (nunca sobrescreve o DESIGN.md
-        da raiz).
+        {IS_CLOUD ? (
+          <>Escolha as bases; salvar guarda a foundation no seu hub (nuvem) e gera o comando shadcn.</>
+        ) : (
+          <>
+            Escolha as bases; salvar grava <code>.workspace/foundation.json</code> e{' '}
+            <code>.workspace/DESIGN.md</code> no projeto (nunca sobrescreve o DESIGN.md
+            da raiz).
+          </>
+        )}
       </p>
 
-      {!isLocal ? (
+      {!canConfigure ? (
         <p className="text-sm text-muted-foreground">
           Disponível só para projeto local (clone o repo do GitHub antes).
         </p>
@@ -215,7 +225,9 @@ export function FoundationScreen() {
               </Button>
               {save.isSuccess && (
                 <span className="text-sm text-muted-foreground">
-                  Salvo em <code>.workspace/</code> ✓
+                  {IS_CLOUD ? 'Salvo no hub ✓' : (
+                    <>Salvo em <code>.workspace/</code> ✓</>
+                  )}
                 </span>
               )}
               {save.isError && (

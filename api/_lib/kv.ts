@@ -1,10 +1,11 @@
 // Persistência do Studio Cloud: Upstash Redis (Marketplace), substituindo o
 // JSON atômico do desktop. Hashes por entidade — escrita atômica por campo.
 import { Redis } from '@upstash/redis'
-import type { Project, ProjectSource, Template } from './types.js'
+import type { Foundation, Project, ProjectSource, Template } from './types.js'
 
 const PROJECTS_KEY = 'ps:projects'
 const TEMPLATES_KEY = 'ps:templates'
+const FOUNDATIONS_KEY = 'ps:foundations'
 
 let client: Redis | null = null
 
@@ -53,6 +54,25 @@ export async function findBySource(
       p.source.nameWithOwner.toLowerCase() ===
         source.nameWithOwner.toLowerCase(),
   )
+}
+
+// Foundation por projeto (Fatia 4 cloud): no desktop vive em
+// .workspace/foundation.json; aqui, num hash por id de projeto.
+export async function getFoundation(
+  projectId: string,
+): Promise<Foundation | null> {
+  return kv().hget<Foundation>(FOUNDATIONS_KEY, projectId)
+}
+
+export async function putFoundation(
+  projectId: string,
+  foundation: Foundation,
+): Promise<void> {
+  await kv().hset(FOUNDATIONS_KEY, { [projectId]: foundation })
+}
+
+export async function deleteFoundation(projectId: string): Promise<void> {
+  await kv().hdel(FOUNDATIONS_KEY, projectId)
 }
 
 export async function listTemplates(): Promise<Template[]> {

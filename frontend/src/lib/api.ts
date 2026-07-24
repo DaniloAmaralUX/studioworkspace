@@ -8,6 +8,9 @@ import type {
 
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:5178/api'
 
+/** Variante cloud = API same-origin (VITE_API_BASE=/api na Vercel). */
+export const IS_CLOUD = BASE.startsWith('/')
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
@@ -96,7 +99,7 @@ export const api = {
   getFoundation: (id: string) =>
     req<FoundationResponse>(`/projects/${id}/foundation`),
   putFoundation: (id: string, f: Foundation) =>
-    req<{ foundation: Foundation; shadcnCommand: string; designPath: string }>(
+    req<{ foundation: Foundation; shadcnCommand: string; designPath: string | null }>(
       `/projects/${id}/foundation`,
       { method: 'PUT', body: JSON.stringify(f) },
     ),

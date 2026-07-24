@@ -1,6 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { z } from 'zod'
-import { deleteProject, getProject, putProject } from '../_lib/kv.js'
+import {
+  deleteFoundation,
+  deleteProject,
+  getProject,
+  putProject,
+} from '../_lib/kv.js'
 import { internalError, methodNotAllowed, sendError } from '../_lib/http.js'
 import type { Project } from '../_lib/types.js'
 
@@ -46,6 +51,8 @@ export default async function handler(
       if (!ok) {
         return sendError(res, 404, 'not_found', 'Projeto não encontrado')
       }
+      // Remover do hub também descarta a foundation associada (best-effort).
+      await deleteFoundation(id).catch(() => {})
       res.status(200).json({ ok: true })
       return
     }
