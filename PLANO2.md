@@ -49,7 +49,12 @@ Na cloud, "trabalhar" = links: `github.com` · `github.dev` · `vscode.dev` · *
 
 ## Fatias (MVP ≈ 3,5 dias)
 
-### Fatia 0 — Shell no ar (~0,5d)
+### Fatia 0 — Shell no ar (~0,5d) — ✅ FEITA em 2026-07-24
+Produção: `https://studio-cloud-blush.vercel.app` (projeto `studio-cloud`, deploy via push na `main`).
+**Pendência única:** o CLI só alcança "Standard Protection" — previews e URLs de deployment pedem
+login, mas o **alias de produção está público**. Antes da Fatia 1, mudar no dashboard:
+*studio-cloud → Settings → Deployment Protection → Vercel Authentication → **All Deployments***.
+(Hoje não há dado/segredo exposto — só o SPA estático e `/api/health`, ambos já públicos no repo.)
 1. Emenda de charter em `CLAUDE.md` + `PRD.md` (texto acima).
 2. `frontend/vercel.json` (rewrite SPA + maxDuration).
 3. `frontend/api/health.ts` — primeira função (`{ ok: true, variant: 'cloud' }`).
