@@ -1,7 +1,6 @@
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import {
   FolderKanban,
-  Github,
   Monitor,
   Cloud,
   PackageCheck,
@@ -10,6 +9,7 @@ import {
   Sparkles,
   Terminal,
 } from 'lucide-react'
+import { GithubIcon } from '@/components/GithubIcon'
 
 /** Chip que marca onde o recurso funciona: desktop, nuvem ou ambos. */
 function Where({ kind }: { kind: 'desktop' | 'nuvem' | 'ambos' }) {
@@ -48,7 +48,7 @@ function Step({
   children,
 }: {
   n: number
-  icon: typeof Plus
+  icon: ComponentType<{ className?: string }>
   title: string
   where: 'desktop' | 'nuvem' | 'ambos'
   children: ReactNode
@@ -157,7 +157,7 @@ export function HowToScreen() {
           </p>
         </Step>
 
-        <Step n={7} icon={Github} title="O princípio de tudo" where="ambos">
+        <Step n={7} icon={GithubIcon} title="O princípio de tudo" where="ambos">
           <p>
             Sua memória de design mora em{' '}
             <strong className="text-foreground">

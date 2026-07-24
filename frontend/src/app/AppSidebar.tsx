@@ -3,9 +3,9 @@ import {
   FolderKanban,
   Palette,
   LayoutTemplate,
-  Github,
   BookOpen,
 } from 'lucide-react'
+import { GithubIcon } from '@/components/GithubIcon'
 import { StudioLogo } from '@/components/StudioLogo'
 import {
   Sidebar,
@@ -83,7 +83,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton disabled tooltip="Conectar GitHub chega na R3">
-              <Github />
+              <GithubIcon />
               <span>Conectar GitHub</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
