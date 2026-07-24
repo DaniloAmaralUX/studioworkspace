@@ -2,18 +2,13 @@ import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { PROJECTS_FILE } from '../config'
 import { readJson, writeJsonAtomic } from '../lib/atomicJson'
+import type { Template } from '../lib/types'
+
+export type { Template }
 
 // Templates (boilerplates) que o usuário adiciona manualmente via link do repo.
 // Nada é pré-populado. Guardado ao lado do índice de projetos.
 const TEMPLATES_FILE = path.join(path.dirname(PROJECTS_FILE), 'templates.json')
-
-export type Template = {
-  id: string
-  name: string
-  repoUrl: string
-  description?: string
-  createdAt: string
-}
 
 export async function listTemplates(): Promise<Template[]> {
   return readJson<Template[]>(TEMPLATES_FILE, [])

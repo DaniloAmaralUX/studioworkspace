@@ -56,8 +56,9 @@ cd frontend && npm install && npm run dev      # http://127.0.0.1:5177
 
 ## Convenções
 
-- Tipos compartilhados espelham `PRD.md` §7 (`Project`, `Foundation`, `ProjectSource`). Manter
-  `frontend/src/lib/types.ts` e `backend/src/lib/types.ts` em sincronia.
+- Tipos compartilhados espelham `PRD.md` §7 (`Project`, `Foundation`, `ProjectSource`). **Fonte única:
+  `shared/types.ts` na raiz** — `frontend/src/lib/types.ts`, `backend/src/lib/types.ts` e
+  `api/_lib/types.ts` são só re-exports type-only dele. Editar sempre no `shared/`; nunca duplicar.
 - Nomes de endpoints e contratos: seguir `BACKEND.md` (o `FRONTEND.md` consome exatamente esses).
 - Toda tela nova deve ser coerente com `DESIGN.md` (princípios, tokens, componentes shadcn).
 - Commits pequenos por fatia. Não fazer push nem criar repositório sem eu pedir.
