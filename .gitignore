@@ -16,8 +16,10 @@ build/
 # Dados locais do Workspace Service
 projects.json
 templates.json
-work/                 # clones sob demanda de repos do GitHub
-.workspace/           # foundation.json + DESIGN.md gerados pelo configurador
+# clones sob demanda de repos do GitHub
+work/
+# foundation.json + DESIGN.md gerados pelo configurador
+.workspace/
 *.log
 
 # Sistema
