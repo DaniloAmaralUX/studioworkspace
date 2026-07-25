@@ -25,12 +25,29 @@ export function ProjectsScreen() {
   const [q, setQ] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
 
-  // Ctrl+K foca a busca ("achar rápido").
+  // Ctrl+K ou "/" focam a busca ("achar rápido"). "/" só quando não estiver
+  // digitando em outro campo (padrão GitHub/Linear).
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
         searchRef.current?.focus()
+        return
+      }
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const el = document.activeElement
+        const typing =
+          el instanceof HTMLInputElement ||
+          el instanceof HTMLTextAreaElement ||
+          (el instanceof HTMLElement && el.isContentEditable)
+        // Com dialog aberto, "/" pertence ao dialog — não rouba o foco.
+        const inDialog =
+          el instanceof HTMLElement &&
+          el.closest('[role="dialog"], [role="alertdialog"]') !== null
+        if (!typing && !inDialog) {
+          e.preventDefault()
+          searchRef.current?.focus()
+        }
       }
     }
     window.addEventListener('keydown', onKey)
@@ -58,7 +75,8 @@ export function ProjectsScreen() {
               ref={searchRef}
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar (Ctrl+K)"
+              placeholder="Buscar (/ ou Ctrl+K)"
+              aria-label="Buscar projetos por nome, tag, stack ou fonte"
               className="w-56 pl-8"
             />
           </div>

@@ -23,7 +23,7 @@ import { NextActionInput } from '@/components/NextActionInput'
 import { OpenWithButtons } from '@/components/OpenWithButtons'
 import { StampButton } from '@/components/StampButton'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DropdownMenu,
@@ -123,7 +123,9 @@ export function ProjectDetail() {
             )}
           <DropdownMenu>
             <DropdownMenuTrigger
-              className="inline-flex items-center gap-1 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              // p-2.5 -m-2.5: infla a área de clique para >=40px (DESIGN.md §8)
+              // sem mudar o tamanho visual da pílula (22px + 2×10px = 42px).
+              className="inline-flex items-center gap-1 rounded-full p-2.5 -m-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label={`Mudar status (atual: ${STATUS_LABEL[project.status]})`}
             >
               <StatusBadge status={project.status} />
@@ -178,6 +180,11 @@ export function ProjectDetail() {
               Studio desbloqueia sozinho na próxima atualização. Nada foi
               apagado do hub.
             </p>
+            <p className="mt-1 truncate font-mono text-xs text-muted-foreground">
+              {project.source.kind === 'local'
+                ? project.source.path
+                : project.source.cloneDir}
+            </p>
           </div>
         </div>
       )}
@@ -194,6 +201,7 @@ export function ProjectDetail() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
               onClick={() =>
                 del.mutate(project.id, {
                   onSuccess: () => {

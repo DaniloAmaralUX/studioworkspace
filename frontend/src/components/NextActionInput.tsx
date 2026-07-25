@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, Loader2, Sparkles } from 'lucide-react'
+import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
@@ -19,6 +20,7 @@ export function NextActionInput({
   const [aiError, setAiError] = useState<string | null>(null)
   const patch = usePatchProject()
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastSaved = useRef(value ?? '')
 
   // Sincroniza se o valor externo mudar (ex.: refetch).
@@ -29,6 +31,9 @@ export function NextActionInput({
 
   function save(next: string) {
     if (next === lastSaved.current) return
+    // Cancela o "saved -> idle" pendente: sem isto, um segundo save dentro da
+    // janela de 1.2s teria o spinner apagado pelo timeout velho.
+    if (savedTimer.current) clearTimeout(savedTimer.current)
     setState('saving')
     patch.mutate(
       { id, patch: { nextAction: next } },
@@ -36,9 +41,17 @@ export function NextActionInput({
         onSuccess: () => {
           lastSaved.current = next
           setState('saved')
-          setTimeout(() => setState('idle'), 1200)
+          savedTimer.current = setTimeout(() => setState('idle'), 1200)
         },
-        onError: () => setState('idle'),
+        onError: (err) => {
+          setState('idle')
+          // Sem isto o spinner some e o usuário assume que salvou — mas o
+          // rollback otimista reverteu o valor (P3 da F1).
+          toast.error('Não deu pra salvar a próxima ação', {
+            description: (err as Error).message,
+            action: { label: 'Tentar de novo', onClick: () => save(next) },
+          })
+        },
       },
     )
   }
@@ -78,9 +91,23 @@ export function NextActionInput({
           className="pr-8"
           aria-label="Próxima ação"
         />
-        <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]">
-          {state === 'saving' && <Loader2 className="size-4 animate-spin" />}
-          {state === 'saved' && <Check className="size-4 text-emerald-500" />}
+        <span
+          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]"
+          role="status"
+          aria-live="polite"
+        >
+          {state === 'saving' && (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              <span className="sr-only">Salvando…</span>
+            </>
+          )}
+          {state === 'saved' && (
+            <>
+              <Check className="size-4 text-emerald-500" aria-hidden />
+              <span className="sr-only">Salvo</span>
+            </>
+          )}
         </span>
       </div>
       <div className="flex items-center gap-2">

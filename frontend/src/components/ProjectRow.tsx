@@ -24,7 +24,7 @@ export function ProjectRow({ project }: { project: Project }) {
             {project.stack.slice(0, 3).map((s) => (
               <span
                 key={s}
-                className="rounded border border-border/60 bg-muted/50 px-1.5 py-px font-mono text-[10.5px] text-muted-foreground"
+                className="rounded border border-border/60 bg-muted/50 px-1.5 py-px font-mono text-[10.5px] text-foreground/75"
               >
                 {s}
               </span>
@@ -46,7 +46,7 @@ export function ProjectRow({ project }: { project: Project }) {
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
         <StatusBadge status={project.status} />
-        <span className="tnum text-[11px] text-muted-foreground/70">
+        <span className="tnum text-[11px] text-muted-foreground">
           {timeAgo(project.lastActivityAt)}
         </span>
       </div>

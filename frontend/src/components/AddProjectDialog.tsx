@@ -123,6 +123,9 @@ export function AddProjectDialog() {
                   value={scName}
                   onChange={(e) => setScName(e.target.value)}
                   placeholder="Meu Novo App"
+                  // Dentro de dialog modal, focar o 1º campo é o padrão
+                  // WAI-ARIA APG; a regra mira autofocus em carga de página.
+                  // eslint-disable-next-line jsx-a11y/no-autofocus
                   autoFocus
                 />
               </div>

@@ -81,3 +81,24 @@ describe('OpenWithButtons (GitHub sem clone)', () => {
     expect(screen.queryByRole('button', { name: /cursor/i })).toBeNull()
   })
 })
+
+describe('OpenWithButtons (pasta sumida)', () => {
+  it('pathMissing desabilita os launchers e clique não abre nada', async () => {
+    const local: Project = {
+      ...GITHUB_SEM_CLONE,
+      id: 'l1',
+      source: { kind: 'local', path: 'C:\\sumiu' },
+      pathMissing: true,
+    }
+    renderWithQuery(<OpenWithButtons project={local} />)
+
+    const explorer = (await screen.findByRole('button', {
+      name: /explorer/i,
+    })) as HTMLButtonElement
+    expect(explorer.disabled).toBe(true)
+
+    fireEvent.click(explorer)
+    expect(api.openProject).not.toHaveBeenCalled()
+    expect(api.cloneProject).not.toHaveBeenCalled()
+  })
+})

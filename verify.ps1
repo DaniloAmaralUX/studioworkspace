@@ -45,6 +45,7 @@ $npx = 'npx.cmd'
 Step -Label "typecheck backend" -Dir (Join-Path $root 'backend')  -Exe $npm -CmdArgs @('run','typecheck')
 Step -Label "typecheck frontend" -Dir (Join-Path $root 'frontend') -Exe $npm -CmdArgs @('run','typecheck')
 Step -Label "typecheck api" -Dir $root -Exe $npx -CmdArgs @('tsc','-p','api/tsconfig.json')
+Step -Label "lint a11y (escopado no core)" -Dir (Join-Path $root 'frontend') -Exe $npm -CmdArgs @('run','lint')
 
 if (-not $Quick) {
   Step -Label "testes backend" -Dir (Join-Path $root 'backend') -Exe $npm -CmdArgs @('test')

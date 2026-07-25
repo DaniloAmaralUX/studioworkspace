@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { FolderOpen, TerminalSquare, Sparkles, Code2 } from 'lucide-react'
+import {
+  FolderOpen,
+  TerminalSquare,
+  Sparkles,
+  Code2,
+  SquareMousePointer,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,7 +30,7 @@ const ITEMS: {
   { kind: 'terminal', label: 'Terminal', icon: TerminalSquare },
   { kind: 'claude', label: 'Claude', icon: Sparkles },
   { kind: 'code', label: 'VS Code', icon: Code2 },
-  { kind: 'cursor', label: 'Cursor', icon: Code2 },
+  { kind: 'cursor', label: 'Cursor', icon: SquareMousePointer },
 ]
 
 export function OpenWithButtons({ project }: { project: Project }) {
@@ -80,6 +86,9 @@ export function OpenWithButtons({ project }: { project: Project }) {
   }
 
   const busy = open.isPending || clone.isPending
+  // Pasta sumida (F2): abrir Explorer/Terminal em cima de caminho inexistente
+  // só gera erro do SO — desabilita com explicação em vez de deixar falhar.
+  const missing = !!project.pathMissing
 
   return (
     <>
@@ -89,9 +98,15 @@ export function OpenWithButtons({ project }: { project: Project }) {
             key={it.kind}
             variant="outline"
             size="sm"
-            disabled={busy}
+            disabled={busy || missing}
+            // Sem title no estado missing: disabled tem pointer-events-none
+            // (tooltip nativo nunca aparece). A explicação vive no banner de
+            // "pasta não encontrada" que o ProjectDetail renderiza na mesma
+            // tela — este componente pressupõe esse contexto.
             title={
-              needsClone ? 'Clona o repositório em work/ antes de abrir' : undefined
+              !missing && needsClone
+                ? 'Clona o repositório em work/ antes de abrir'
+                : undefined
             }
             onClick={() => handleClick(it.kind)}
           >
