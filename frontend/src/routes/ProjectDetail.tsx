@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ChevronDown, GitBranch, LayoutDashboard, Trash2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  ChevronDown,
+  FolderX,
+  GitBranch,
+  LayoutDashboard,
+  Trash2,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import {
   useDeleteProject,
@@ -157,6 +164,23 @@ export function ProjectDetail() {
           </Button>
         </div>
       </div>
+
+      {project.pathMissing && (
+        <div className="mb-5 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm">
+          <FolderX className="mt-0.5 size-4 shrink-0 text-destructive" />
+          <div>
+            <p className="font-medium text-destructive">
+              Pasta não encontrada no disco.
+            </p>
+            <p className="text-muted-foreground">
+              O caminho associado sumiu (drive desconectado? pasta renomeada?).
+              Reconecte o drive ou restaure a pasta no caminho original — o
+              Studio desbloqueia sozinho na próxima atualização. Nada foi
+              apagado do hub.
+            </p>
+          </div>
+        </div>
+      )}
 
       <AlertDialog open={removeOpen} onOpenChange={setRemoveOpen}>
         <AlertDialogContent>

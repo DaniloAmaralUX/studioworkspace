@@ -1,22 +1,43 @@
 import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { PROJECTS_FILE } from '../config'
-import { readJson, writeJsonAtomic } from '../lib/atomicJson'
+import { backupCorrupt, readJson, writeJsonAtomic } from '../lib/atomicJson'
 import type { Project, ProjectSource, ProjectStatus } from '../lib/types'
 import { seedProjects } from './seed'
 
 let cache: Project[] | null = null
+// Promise em voo: sem isto, dois GETs concorrentes no primeiro load fariam
+// readJson/seed em paralelo — e com arquivo corrompido, o segundo veria ENOENT
+// (após o rename p/ .bak do primeiro) e re-seedaria por cima.
+let loading: Promise<Project[]> | null = null
 
-export async function loadProjects(): Promise<Project[]> {
-  if (cache) return cache
-  const existing = await readJson<Project[] | null>(PROJECTS_FILE, null)
-  if (existing) {
+async function doLoad(): Promise<Project[]> {
+  // fallback null = arquivo nunca existiu → semeia; corruptFallback [] = o
+  // arquivo existia e corrompeu (preservado em .bak-<ts>) → índice vazio SEM
+  // re-seed, para o usuário perceber e poder recuperar o .bak.
+  const existing = await readJson<Project[] | null>(PROJECTS_FILE, null, [])
+  if (Array.isArray(existing)) {
     cache = existing
+  } else if (existing !== null) {
+    // JSON sintaticamente válido mas com shape errado (ex.: '{}' editado na
+    // mão): mesmo tratamento de corrupção — preserva e serve índice vazio.
+    await backupCorrupt(PROJECTS_FILE)
+    cache = []
   } else {
     cache = seedProjects()
     await writeJsonAtomic(PROJECTS_FILE, cache)
   }
   return cache
+}
+
+export async function loadProjects(): Promise<Project[]> {
+  if (cache) return cache
+  if (!loading) {
+    loading = doLoad().finally(() => {
+      loading = null
+    })
+  }
+  return loading
 }
 
 async function persist(list: Project[]): Promise<void> {

@@ -26,6 +26,12 @@ export interface Project {
   foundationId?: string
   createdAt: string
   updatedAt: string
+  /**
+   * Computado no GET /api/projects quando a pasta local (ou cloneDir) sumiu do
+   * disco. NUNCA persistido no projects.json — o backend também força
+   * status 'blocked' na resposta enquanto o caminho estiver ausente.
+   */
+  pathMissing?: boolean
 }
 
 export type LauncherKind = 'explorer' | 'terminal' | 'claude' | 'code' | 'cursor'

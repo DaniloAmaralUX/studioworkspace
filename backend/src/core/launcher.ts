@@ -4,9 +4,13 @@ import type { LauncherKind } from '../lib/types'
 
 const pExecFile = promisify(execFile)
 
+// Detecção nunca pode travar o hub: `where`/`reg` são rápidos, mas AV ou disco
+// lento já causaram hangs — timeout mata o processo e trata como "não tem".
+const EXEC_TIMEOUT_MS = 5000
+
 async function onPath(cmd: string): Promise<boolean> {
   try {
-    await pExecFile('where', [cmd], { windowsHide: true })
+    await pExecFile('where', [cmd], { windowsHide: true, timeout: EXEC_TIMEOUT_MS })
     return true
   } catch {
     return false
@@ -17,6 +21,7 @@ async function hasClaudeProtocol(): Promise<boolean> {
   try {
     await pExecFile('reg', ['query', 'HKCU\\Software\\Classes\\claude'], {
       windowsHide: true,
+      timeout: EXEC_TIMEOUT_MS,
     })
     return true
   } catch {
@@ -31,7 +36,7 @@ async function claudeExePath(): Promise<string | null> {
     const { stdout } = await pExecFile(
       'reg',
       ['query', 'HKCU\\Software\\Classes\\claude\\shell\\open\\command', '/ve'],
-      { windowsHide: true },
+      { windowsHide: true, timeout: EXEC_TIMEOUT_MS },
     )
     const match = stdout.match(/"([^"]+\.exe)"/i)
     return match?.[1] ?? null

@@ -93,8 +93,9 @@ export function ProjectsScreen() {
           <div className="flex-1">
             <p className="font-medium">Workspace Service não respondeu.</p>
             <p className="text-muted-foreground">
-              {(error as Error)?.message}. Suba o backend (
-              <code>npm run dev</code> em <code>backend/</code>) e tente de novo.
+              {(error as Error)?.message}. Rode{' '}
+              <code>./start-workspace.ps1</code> na raiz do projeto (sobe
+              backend + frontend) e tente de novo.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={() => refetch()}>

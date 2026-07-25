@@ -13,6 +13,7 @@ import {
 import { detectStack } from '../core/stackDetect'
 import { gitInfo } from '../core/git'
 import { idParams } from '../lib/schemas'
+import type { Project } from '../lib/types'
 
 const patchSchema = z.object({
   name: z.string().min(1).optional(),
@@ -28,9 +29,28 @@ const localSchema = z.object({
   name: z.string().min(1).optional(),
 })
 
+// Caminho em disco que o projeto referencia (pasta local ou clone), se houver.
+function diskPath(p: { source: Project['source'] }): string | null {
+  if (p.source.kind === 'local') return p.source.path
+  if (p.source.kind === 'github' && p.source.cloneDir) return p.source.cloneDir
+  return null
+}
+
 export const projectRoutes: FastifyPluginAsyncZod = async (app) => {
+  // pathMissing/status:'blocked' são COMPUTADOS por resposta (nunca persistidos):
+  // se a pasta voltar (drive remontado, rename desfeito), o projeto volta ao
+  // status salvo sem intervenção.
   app.get('/api/projects', async () => {
-    return await loadProjects()
+    const list = await loadProjects()
+    return await Promise.all(
+      list.map(async (p) => {
+        const target = diskPath(p)
+        if (!target) return p
+        const stat = await fs.stat(target).catch(() => null)
+        if (stat?.isDirectory()) return p
+        return { ...p, status: 'blocked' as const, pathMissing: true }
+      }),
+    )
   })
 
   // Associa uma pasta local (não copia/move nada).

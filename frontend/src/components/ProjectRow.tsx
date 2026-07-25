@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, FolderX } from 'lucide-react'
 import { StatusBadge } from './StatusBadge'
 import { timeAgo } from '@/lib/utils'
 import type { Project } from '@/lib/types'
@@ -31,10 +31,17 @@ export function ProjectRow({ project }: { project: Project }) {
             ))}
           </span>
         </div>
-        {project.nextAction && (
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">
-            {project.nextAction}
+        {project.pathMissing ? (
+          <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-destructive">
+            <FolderX className="size-3 shrink-0" />
+            Pasta não encontrada no disco
           </p>
+        ) : (
+          project.nextAction && (
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+              {project.nextAction}
+            </p>
+          )
         )}
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
