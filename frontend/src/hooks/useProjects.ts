@@ -64,6 +64,16 @@ export function useOpenProject() {
   })
 }
 
+export function useDeleteProject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.deleteProject(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: KEY })
+    },
+  })
+}
+
 export function useAddLocalProject() {
   const qc = useQueryClient()
   return useMutation({

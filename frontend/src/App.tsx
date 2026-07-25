@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Route, Routes } from 'react-router-dom'
 import { ThemeProvider } from '@/app/ThemeProvider'
+import { Toaster } from '@/components/ui/sonner'
 import { AppLayout } from '@/app/AppLayout'
 import { ProjectsScreen } from '@/routes/ProjectsScreen'
 import { ThemesScreen } from '@/routes/ThemesScreen'
@@ -52,6 +53,7 @@ export default function App() {
             />
           )}
         </Routes>
+        <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
   )
