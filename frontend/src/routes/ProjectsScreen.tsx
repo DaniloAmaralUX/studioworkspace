@@ -1,15 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Search, AlertTriangle } from 'lucide-react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Search, AlertTriangle, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProjectRow } from '@/components/ProjectRow'
 import { EmptyState } from '@/components/EmptyState'
-import { AddProjectDialog } from '@/components/AddProjectDialog'
 import { useProjects } from '@/hooks/useProjects'
 import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { filterProjects } from '@/lib/filterProjects'
+
+// Fora do chunk INICIAL (F4): o dialog de adicionar (com abas, Select, fluxo
+// GitHub/scaffold) sai do index e carrega em paralelo assim que a Home monta
+// (não bloqueia o primeiro paint). Fallback = botão idêntico desabilitado.
+const AddProjectDialog = lazy(() =>
+  import('@/components/AddProjectDialog').then((m) => ({
+    default: m.AddProjectDialog,
+  })),
+)
 
 export function ProjectsScreen() {
   useDocumentTitle('Projetos')
@@ -54,7 +62,15 @@ export function ProjectsScreen() {
               className="w-56 pl-8"
             />
           </div>
-          <AddProjectDialog />
+          <Suspense
+            fallback={
+              <Button disabled>
+                <Plus /> Projeto
+              </Button>
+            }
+          >
+            <AddProjectDialog />
+          </Suspense>
         </div>
       </header>
 

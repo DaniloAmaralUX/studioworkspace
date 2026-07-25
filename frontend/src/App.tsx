@@ -5,16 +5,36 @@ import { ThemeProvider } from '@/app/ThemeProvider'
 import { Toaster } from '@/components/ui/sonner'
 import { AppLayout } from '@/app/AppLayout'
 import { ProjectsScreen } from '@/routes/ProjectsScreen'
-import { ThemesScreen } from '@/routes/ThemesScreen'
-import { TemplatesScreen } from '@/routes/TemplatesScreen'
 import { ProjectDetail } from '@/routes/ProjectDetail'
-import { FoundationScreen } from '@/routes/FoundationScreen'
-import { HowToScreen } from '@/routes/HowToScreen'
 import { IS_CLOUD } from '@/lib/api'
 
 // Modo Maestri: desktop-only e pesado (React Flow) — carregado sob demanda e
 // mantido fora do bundle da nuvem (mesma SPA), onde PTY não roda.
 const CanvasScreen = lazy(() => import('@/routes/CanvasScreen'))
+
+// Telas secundárias fora do chunk inicial (F4): o ciclo diário é
+// achar → decidir → abrir, então só Projects e ProjectDetail ficam eager.
+// (.then(m => ({default: ...})) adapta named export ao lazy sem tocar as telas.)
+const ThemesScreen = lazy(() =>
+  import('@/routes/ThemesScreen').then((m) => ({ default: m.ThemesScreen })),
+)
+const TemplatesScreen = lazy(() =>
+  import('@/routes/TemplatesScreen').then((m) => ({ default: m.TemplatesScreen })),
+)
+const FoundationScreen = lazy(() =>
+  import('@/routes/FoundationScreen').then((m) => ({ default: m.FoundationScreen })),
+)
+const HowToScreen = lazy(() =>
+  import('@/routes/HowToScreen').then((m) => ({ default: m.HowToScreen })),
+)
+
+function ScreenFallback() {
+  return (
+    <div className="grid min-h-48 place-items-center text-sm text-muted-foreground">
+      Carregando…
+    </div>
+  )
+}
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -27,13 +47,38 @@ export default function App() {
         <Routes>
           <Route element={<AppLayout />}>
             <Route index element={<ProjectsScreen />} />
-            <Route path="themes" element={<ThemesScreen />} />
-            <Route path="templates" element={<TemplatesScreen />} />
-            <Route path="como-usar" element={<HowToScreen />} />
+            <Route
+              path="themes"
+              element={
+                <Suspense fallback={<ScreenFallback />}>
+                  <ThemesScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="templates"
+              element={
+                <Suspense fallback={<ScreenFallback />}>
+                  <TemplatesScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="como-usar"
+              element={
+                <Suspense fallback={<ScreenFallback />}>
+                  <HowToScreen />
+                </Suspense>
+              }
+            />
             <Route path="projects/:id" element={<ProjectDetail />} />
             <Route
               path="projects/:id/foundation"
-              element={<FoundationScreen />}
+              element={
+                <Suspense fallback={<ScreenFallback />}>
+                  <FoundationScreen />
+                </Suspense>
+              }
             />
           </Route>
           {!IS_CLOUD && (
