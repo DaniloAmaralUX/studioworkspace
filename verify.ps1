@@ -3,11 +3,11 @@
   Portao agregador fail-fast do automode (core do Project Studio).
 .DESCRIPTION
   Ordem: typecheck backend -> typecheck frontend -> typecheck api ->
-  [full] testes backend -> build frontend.
+  [full] testes backend -> testes frontend -> build frontend.
   Exit 0 = verde. Qualquer etapa falha aborta imediatamente com exit 1.
   PS 5.1-safe: sem '&&', checa $LASTEXITCODE apos cada comando nativo.
 .PARAMETER Quick
-  Pula os testes backend e o build frontend (ciclo rapido ~30-40s durante execucao).
+  Pula os testes (backend e frontend) e o build frontend (ciclo rapido ~30-40s).
   Sem -Quick roda o portao completo (~2-3min), obrigatorio 1x por fatia.
 .PARAMETER BundleBudget
   Se informado (F4+), falha se algum chunk .js em frontend/dist/assets exceder o valor em kB.
@@ -48,6 +48,7 @@ Step -Label "typecheck api" -Dir $root -Exe $npx -CmdArgs @('tsc','-p','api/tsco
 
 if (-not $Quick) {
   Step -Label "testes backend" -Dir (Join-Path $root 'backend') -Exe $npm -CmdArgs @('test')
+  Step -Label "testes frontend" -Dir (Join-Path $root 'frontend') -Exe $npm -CmdArgs @('test')
   Step -Label "build frontend"  -Dir (Join-Path $root 'frontend') -Exe $npm -CmdArgs @('run','build')
 
   if ($BundleBudget -gt 0) {

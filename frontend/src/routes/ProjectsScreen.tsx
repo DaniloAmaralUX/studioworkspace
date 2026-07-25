@@ -9,11 +9,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { AddProjectDialog } from '@/components/AddProjectDialog'
 import { useProjects } from '@/hooks/useProjects'
 import { useDocumentTitle } from '@/lib/useDocumentTitle'
-import type { Project } from '@/lib/types'
-
-function sourceText(p: Project): string {
-  return p.source.kind === 'github' ? p.source.nameWithOwner : p.source.path
-}
+import { filterProjects } from '@/lib/filterProjects'
 
 export function ProjectsScreen() {
   useDocumentTitle('Projetos')
@@ -33,17 +29,10 @@ export function ProjectsScreen() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const filtered = useMemo(() => {
-    if (!data) return []
-    const term = q.trim().toLowerCase()
-    if (!term) return data
-    return data.filter((p) =>
-      [p.name, sourceText(p), ...p.tags, ...p.stack, p.nextAction ?? '']
-        .join(' ')
-        .toLowerCase()
-        .includes(term),
-    )
-  }, [data, q])
+  const filtered = useMemo(
+    () => (data ? filterProjects(data, q) : []),
+    [data, q],
+  )
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
