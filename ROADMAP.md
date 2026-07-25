@@ -19,24 +19,24 @@ editável** (persiste) + botão "abrir no Explorer".
 > Extra já incluído: busca com `Ctrl+K` (filtro client-side), badges de status/fonte/stack, auto-save
 > com debounce e indicador "salvo", estados de loading/erro/vazio.
 
-## Fatia 1 — Fontes (local + GitHub)
+## Fatia 1 — Fontes (local + GitHub) ✅ (concluída)
 Adicionar projeto de pasta local (seletor + detecção de stack) **ou** do GitHub (`gh repo list` →
 escolher; metadados via `gh`, sem clonar).
 
 **Pronto quando:**
-- [ ] `POST /api/projects/local` valida, impede duplicata, detecta stack, não move arquivos.
-- [ ] `GET /api/github/repos` lista meus repos via `gh`.
-- [ ] `POST /api/projects/github` adiciona com descrição/linguagem/`pushedAt`/issues.
-- [ ] Dialog "Adicionar projeto" com abas Local / GitHub.
-- [ ] Cards distinguem fonte (local vs GitHub) e mostram stack/última atividade.
+- [x] `POST /api/projects/local` valida, impede duplicata, detecta stack, não move arquivos.
+- [x] `GET /api/github/repos` lista meus repos via `gh`.
+- [x] `POST /api/projects/github` adiciona com descrição/linguagem/`pushedAt`/issues.
+- [x] Dialog "Adicionar projeto" com abas Local / GitHub (`AddProjectDialog.tsx`).
+- [x] Cards distinguem fonte (local vs GitHub) e mostram stack/última atividade.
 
-## Fatia 2 — Achar rápido
+## Fatia 2 — Achar rápido (~ parcial: busca ✅; filtros/tags → backlog)
 Busca + filtro (tag/stack/fonte) + ordenar por última atividade; editar tags e status.
 
 **Pronto quando:**
-- [ ] Busca textual (`Ctrl+K` foca) filtra em tempo real.
-- [ ] Filtros por tag/stack/fonte e ordenação funcionam.
-- [ ] Editar tags/status por projeto (persiste).
+- [x] Busca textual (`Ctrl+K` foca) filtra em tempo real.
+- [ ] Filtros por tag/stack/fonte e ordenação → `docs/plans/backlog.md` (busca cobre "achar <5s" em escala pessoal).
+- [~] Editar status por projeto → alvo da fatia automode **F1**; editar tags → backlog.
 
 ## Fatia 3 — Abrir / trabalhar ✅ (concluída, ver R6)
 Abridores conforme disponibilidade; GitHub sem clone → `gh repo clone` sob demanda antes de abrir.
