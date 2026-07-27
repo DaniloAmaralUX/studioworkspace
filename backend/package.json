@@ -9,6 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ai-sdk/amazon-bedrock": "^5.0.32",
     "@fastify/cors": "^10.0.2",
     "@fastify/static": "^10.1.2",
     "@fastify/websocket": "^11.3.0",

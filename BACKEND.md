@@ -120,6 +120,17 @@ Todas as respostas são JSON. Erros retornam `{ error: { code, message } }` com 
   - gera o **comando `shadcn`** correspondente (retorna a string; **não** executa por padrão) e
     (re)gera `DESIGN.md` no projeto. → `{ command: string, designMdPath: string }`.
 
+### IA (próxima ação)
+- `POST /api/projects/:id/ai-next-action` → `{ suggestion: string }` — **uma** frase de próxima
+  ação, gerada a partir de README + últimos 12 assuntos de commit do projeto.
+  - `404 not_found` projeto inexistente · `503 ai_not_configured` sem credencial ·
+    `502 ai_empty`/`ai_failed` falha do provedor.
+  - Provedor escolhido pelo ambiente em `core/ai.ts` (ver `backend/.env.example`):
+    **Amazon Bedrock** quando há `AWS_BEARER_TOKEN_BEDROCK` (ou par IAM), senão **Vercel AI
+    Gateway** (`AI_GATEWAY_API_KEY` / `VERCEL_OIDC_TOKEN`). `ANTHROPIC_API_KEY` nunca é usada.
+  - Modelo trocável por `PS_AI_MODEL`. Chamada só acontece por clique explícito do usuário —
+    não há chamada de IA automática ou em background.
+
 ## Detecção de stack (`stackDetect.ts`)
 
 Ler apenas o topo da pasta (sem varredura profunda) e mapear arquivos-chave → tags:
