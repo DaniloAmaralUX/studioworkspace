@@ -1,47 +1,63 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Search, AlertTriangle } from 'lucide-react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Search, AlertTriangle, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProjectRow } from '@/components/ProjectRow'
 import { EmptyState } from '@/components/EmptyState'
-import { AddProjectDialog } from '@/components/AddProjectDialog'
 import { useProjects } from '@/hooks/useProjects'
-import type { Project } from '@/lib/types'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
+import { filterProjects } from '@/lib/filterProjects'
 
-function sourceText(p: Project): string {
-  return p.source.kind === 'github' ? p.source.nameWithOwner : p.source.path
-}
+// Fora do chunk INICIAL (F4): o dialog de adicionar (com abas, Select, fluxo
+// GitHub/scaffold) sai do index e carrega em paralelo assim que a Home monta
+// (não bloqueia o primeiro paint). Fallback = botão idêntico desabilitado.
+const AddProjectDialog = lazy(() =>
+  import('@/components/AddProjectDialog').then((m) => ({
+    default: m.AddProjectDialog,
+  })),
+)
 
 export function ProjectsScreen() {
+  useDocumentTitle('Projetos')
   const { data, isLoading, isError, error, refetch } = useProjects()
   const [q, setQ] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
 
-  // Ctrl+K foca a busca ("achar rápido").
+  // Ctrl+K ou "/" focam a busca ("achar rápido"). "/" só quando não estiver
+  // digitando em outro campo (padrão GitHub/Linear).
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
         searchRef.current?.focus()
+        return
+      }
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const el = document.activeElement
+        const typing =
+          el instanceof HTMLInputElement ||
+          el instanceof HTMLTextAreaElement ||
+          (el instanceof HTMLElement && el.isContentEditable)
+        // Com dialog aberto, "/" pertence ao dialog — não rouba o foco.
+        const inDialog =
+          el instanceof HTMLElement &&
+          el.closest('[role="dialog"], [role="alertdialog"]') !== null
+        if (!typing && !inDialog) {
+          e.preventDefault()
+          searchRef.current?.focus()
+        }
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const filtered = useMemo(() => {
-    if (!data) return []
-    const term = q.trim().toLowerCase()
-    if (!term) return data
-    return data.filter((p) =>
-      [p.name, sourceText(p), ...p.tags, ...p.stack, p.nextAction ?? '']
-        .join(' ')
-        .toLowerCase()
-        .includes(term),
-    )
-  }, [data, q])
+  const filtered = useMemo(
+    () => (data ? filterProjects(data, q) : []),
+    [data, q],
+  )
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
@@ -59,11 +75,20 @@ export function ProjectsScreen() {
               ref={searchRef}
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar (Ctrl+K)"
+              placeholder="Buscar (/ ou Ctrl+K)"
+              aria-label="Buscar projetos por nome, tag, stack ou fonte"
               className="w-56 pl-8"
             />
           </div>
-          <AddProjectDialog />
+          <Suspense
+            fallback={
+              <Button disabled>
+                <Plus /> Projeto
+              </Button>
+            }
+          >
+            <AddProjectDialog />
+          </Suspense>
         </div>
       </header>
 
@@ -91,8 +116,9 @@ export function ProjectsScreen() {
           <div className="flex-1">
             <p className="font-medium">Workspace Service não respondeu.</p>
             <p className="text-muted-foreground">
-              {(error as Error)?.message}. Suba o backend (
-              <code>npm run dev</code> em <code>backend/</code>) e tente de novo.
+              {(error as Error)?.message}. Rode{' '}
+              <code>./start-workspace.ps1</code> na raiz do projeto (sobe
+              backend + frontend) e tente de novo.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={() => refetch()}>

@@ -9,6 +9,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Check, Copy } from 'lucide-react'
 import { useFoundation, usePutFoundation, useProjects } from '@/hooks/useProjects'
 import { IS_CLOUD } from '@/lib/api'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { themePresets } from '@/lib/themePresets'
 import type { Density, Foundation } from '@/lib/types'
 import { Button } from '@/components/ui/button'
@@ -75,6 +76,7 @@ export function FoundationScreen() {
   const { id = '' } = useParams()
   const { data: projects } = useProjects()
   const project = projects?.find((p) => p.id === id)
+  useDocumentTitle(project ? `Foundation · ${project.name}` : 'Foundation')
   const isLocal = !!project && project.source.kind === 'local'
   // Desktop: só projeto local (arquivos em .workspace/). Cloud: qualquer
   // projeto do hub (foundation vive no KV).

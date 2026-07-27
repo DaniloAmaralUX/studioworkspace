@@ -8,8 +8,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 
 export function TemplatesScreen() {
+  useDocumentTitle('Templates')
   const templates = useTemplates()
   const add = useAddTemplate()
   const remove = useRemoveTemplate()

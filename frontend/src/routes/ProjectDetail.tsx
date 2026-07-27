@@ -1,25 +1,80 @@
-import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, GitBranch } from 'lucide-react'
-import { useProjectGit, useProjects } from '@/hooks/useProjects'
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  ArrowLeft,
+  ChevronDown,
+  FolderX,
+  GitBranch,
+  LayoutDashboard,
+  Trash2,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import {
+  useDeleteProject,
+  usePatchProject,
+  useProjectGit,
+  useProjects,
+} from '@/hooks/useProjects'
+import { IS_CLOUD } from '@/lib/api'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { StatusBadge } from '@/components/StatusBadge'
 import { SourceBadge } from '@/components/SourceBadge'
 import { NextActionInput } from '@/components/NextActionInput'
 import { OpenWithButtons } from '@/components/OpenWithButtons'
 import { StampButton } from '@/components/StampButton'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { getStoredPresetName } from '@/lib/theme'
+import type { ProjectStatus } from '@/lib/types'
+
+const STATUS_LABEL: Record<ProjectStatus, string> = {
+  planning: 'Planejando',
+  building: 'Construindo',
+  review: 'Em revisão',
+  blocked: 'Bloqueado',
+  done: 'Concluído',
+}
+const STATUS_ORDER: ProjectStatus[] = [
+  'planning',
+  'building',
+  'review',
+  'blocked',
+  'done',
+]
 
 export function ProjectDetail() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
   const { data: projects } = useProjects()
   const project = projects?.find((p) => p.id === id)
+  const patch = usePatchProject()
+  const del = useDeleteProject()
+  const [removeOpen, setRemoveOpen] = useState(false)
   const git = useProjectGit(
     id,
     !!project &&
       (project.source.kind === 'local' || !!project.source.cloneDir),
   )
+  useDocumentTitle(project?.name)
 
   const back = (
     <Link
@@ -56,8 +111,115 @@ export function ProjectDetail() {
             <SourceBadge source={project.source} />
           </div>
         </div>
-        <StatusBadge status={project.status} />
+        <div className="flex items-center gap-2">
+          {!IS_CLOUD &&
+            (project.source.kind === 'local' || project.source.cloneDir) && (
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/projects/${project.id}/canvas`}>
+                  <LayoutDashboard className="size-3.5" />
+                  Canvas
+                </Link>
+              </Button>
+            )}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              // p-2.5 -m-2.5: infla a área de clique para >=40px (DESIGN.md §8)
+              // sem mudar o tamanho visual da pílula (22px + 2×10px = 42px).
+              className="inline-flex items-center gap-1 rounded-full p-2.5 -m-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={`Mudar status (atual: ${STATUS_LABEL[project.status]})`}
+            >
+              <StatusBadge status={project.status} />
+              <ChevronDown className="size-3.5 text-muted-foreground" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Status</DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={project.status}
+                onValueChange={(v) =>
+                  patch.mutate(
+                    { id: project.id, patch: { status: v as ProjectStatus } },
+                    {
+                      onError: (err) =>
+                        toast.error('Não deu pra mudar o status', {
+                          description: (err as Error).message,
+                        }),
+                    },
+                  )
+                }
+              >
+                {STATUS_ORDER.map((s) => (
+                  <DropdownMenuRadioItem key={s} value={s}>
+                    {STATUS_LABEL[s]}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-destructive"
+            onClick={() => setRemoveOpen(true)}
+          >
+            <Trash2 className="size-3.5" />
+            Remover do hub
+          </Button>
+        </div>
       </div>
+
+      {project.pathMissing && (
+        <div className="mb-5 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm">
+          <FolderX className="mt-0.5 size-4 shrink-0 text-destructive" />
+          <div>
+            <p className="font-medium text-destructive">
+              Pasta não encontrada no disco.
+            </p>
+            <p className="text-muted-foreground">
+              O caminho associado sumiu (drive desconectado? pasta renomeada?).
+              Reconecte o drive ou restaure a pasta no caminho original — o
+              Studio desbloqueia sozinho na próxima atualização. Nada foi
+              apagado do hub.
+            </p>
+            <p className="mt-1 truncate font-mono text-xs text-muted-foreground">
+              {project.source.kind === 'local'
+                ? project.source.path
+                : project.source.cloneDir}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <AlertDialog open={removeOpen} onOpenChange={setRemoveOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover “{project.name}” do hub?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Isso só tira o projeto da lista do Studio. A pasta e os arquivos
+              continuam intactos no disco — nada é apagado.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              onClick={() =>
+                del.mutate(project.id, {
+                  onSuccess: () => {
+                    toast.success('Projeto removido do hub.')
+                    void navigate('/')
+                  },
+                  onError: (err) =>
+                    toast.error('Não deu pra remover', {
+                      description: (err as Error).message,
+                    }),
+                })
+              }
+            >
+              Remover do hub
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Tabs defaultValue="overview">
         <TabsList>

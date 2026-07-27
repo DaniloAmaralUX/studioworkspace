@@ -1,4 +1,5 @@
 import type {
+  CanvasDoc,
   Foundation,
   Launchers,
   LauncherKind,
@@ -13,6 +14,9 @@ export const IS_CLOUD = BASE.startsWith('/')
 
 /** Base da API (para links de página inteira, ex.: /api/auth/login). */
 export const API_BASE = BASE
+
+/** Base WebSocket (Modo Maestri, desktop) — ws://127.0.0.1:5178/api. */
+export const WS_BASE = BASE.replace(/^http/, 'ws')
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -139,6 +143,31 @@ export const api = {
       '/projects/scaffold',
       { method: 'POST', body: JSON.stringify(input) },
     ),
+
+  // ── Canvas (Modo Maestri, desktop-only) ──
+  getCanvas: (id: string, floor = 'main') =>
+    req<CanvasDoc>(`/projects/${id}/canvas?floor=${floor}`),
+  putCanvas: (id: string, doc: CanvasDoc) =>
+    req<{ ok: true }>(`/projects/${id}/canvas`, {
+      method: 'PUT',
+      body: JSON.stringify(doc),
+    }),
+  getNote: (id: string, noteId: string) =>
+    req<{ content: string }>(`/projects/${id}/canvas/notes/${noteId}`),
+  putNote: (id: string, noteId: string, content: string) =>
+    req<{ ok: true }>(`/projects/${id}/canvas/notes/${noteId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ content }),
+    }),
+  createNote: (id: string, title: string) =>
+    req<{ id: string }>(`/projects/${id}/canvas/notes`, {
+      method: 'POST',
+      body: JSON.stringify({ title }),
+    }),
+  deleteNote: (id: string, noteId: string) =>
+    req<{ ok: true }>(`/projects/${id}/canvas/notes/${noteId}`, {
+      method: 'DELETE',
+    }),
 }
 
 export type StampAction = 'created' | 'updated' | 'unchanged'

@@ -10,6 +10,7 @@ import {
   Terminal,
 } from 'lucide-react'
 import { GithubIcon } from '@/components/GithubIcon'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 
 /** Chip que marca onde o recurso funciona: desktop, nuvem ou ambos. */
 function Where({ kind }: { kind: 'desktop' | 'nuvem' | 'ambos' }) {
@@ -71,6 +72,7 @@ function Step({
 }
 
 export function HowToScreen() {
+  useDocumentTitle('Como usar')
   return (
     <div className="mx-auto max-w-3xl px-6 py-8">
       <header className="mb-6">

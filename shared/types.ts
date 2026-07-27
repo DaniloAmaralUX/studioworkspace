@@ -26,6 +26,12 @@ export interface Project {
   foundationId?: string
   createdAt: string
   updatedAt: string
+  /**
+   * Computado no GET /api/projects quando a pasta local (ou cloneDir) sumiu do
+   * disco. NUNCA persistido no projects.json — o backend também força
+   * status 'blocked' na resposta enquanto o caminho estiver ausente.
+   */
+  pathMissing?: boolean
 }
 
 export type LauncherKind = 'explorer' | 'terminal' | 'claude' | 'code' | 'cursor'
@@ -49,4 +55,74 @@ export type Template = {
   repoUrl: string
   description?: string
   createdAt: string
+}
+
+// ── Modo Maestri (canvas de orquestração — branch canvas, desktop-only) ──
+// A união completa entra de uma vez para não mexer no shared a cada fatia.
+
+export type CanvasNodeKind =
+  | 'terminal'
+  | 'note'
+  | 'text'
+  | 'draw'
+  | 'filetree'
+  | 'group'
+
+export type CanvasNodeData =
+  | { kind: 'terminal'; title: string; role?: 'agent' | 'shell'; autorun?: 'claude' | 'codex' | null }
+  | { kind: 'note'; title: string; file: string }
+  | { kind: 'text'; text: string }
+  | { kind: 'draw'; strokes: number[][][]; color: string }
+  | { kind: 'filetree'; rootRel: string; depth: number }
+  | { kind: 'group'; label: string }
+
+export interface CanvasNode {
+  id: string
+  kind: CanvasNodeKind
+  position: { x: number; y: number }
+  width?: number
+  height?: number
+  parentId?: string
+  data: CanvasNodeData
+}
+
+export interface CanvasEdge {
+  id: string
+  source: string
+  target: string
+  mode: 'manual' | 'auto'
+  prefix?: string
+}
+
+export interface CanvasViewport {
+  x: number
+  y: number
+  zoom: number
+}
+
+export interface Routine {
+  id: string
+  nodeId: string
+  prompt: string
+  intervalMinutes: number
+  enabled: boolean
+  lastRunAt?: string
+}
+
+export interface Floor {
+  id: string
+  name: string
+  branch: string
+  dir: string
+  createdAt: string
+}
+
+export interface CanvasDoc {
+  version: 1
+  floorId: string
+  nodes: CanvasNode[]
+  edges: CanvasEdge[]
+  viewport: CanvasViewport
+  routines: Routine[]
+  updatedAt: string
 }

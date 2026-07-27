@@ -19,24 +19,24 @@ editável** (persiste) + botão "abrir no Explorer".
 > Extra já incluído: busca com `Ctrl+K` (filtro client-side), badges de status/fonte/stack, auto-save
 > com debounce e indicador "salvo", estados de loading/erro/vazio.
 
-## Fatia 1 — Fontes (local + GitHub)
+## Fatia 1 — Fontes (local + GitHub) ✅ (concluída)
 Adicionar projeto de pasta local (seletor + detecção de stack) **ou** do GitHub (`gh repo list` →
 escolher; metadados via `gh`, sem clonar).
 
 **Pronto quando:**
-- [ ] `POST /api/projects/local` valida, impede duplicata, detecta stack, não move arquivos.
-- [ ] `GET /api/github/repos` lista meus repos via `gh`.
-- [ ] `POST /api/projects/github` adiciona com descrição/linguagem/`pushedAt`/issues.
-- [ ] Dialog "Adicionar projeto" com abas Local / GitHub.
-- [ ] Cards distinguem fonte (local vs GitHub) e mostram stack/última atividade.
+- [x] `POST /api/projects/local` valida, impede duplicata, detecta stack, não move arquivos.
+- [x] `GET /api/github/repos` lista meus repos via `gh`.
+- [x] `POST /api/projects/github` adiciona com descrição/linguagem/`pushedAt`/issues.
+- [x] Dialog "Adicionar projeto" com abas Local / GitHub (`AddProjectDialog.tsx`).
+- [x] Cards distinguem fonte (local vs GitHub) e mostram stack/última atividade.
 
-## Fatia 2 — Achar rápido
+## Fatia 2 — Achar rápido (~ parcial: busca ✅; filtros/tags → backlog)
 Busca + filtro (tag/stack/fonte) + ordenar por última atividade; editar tags e status.
 
 **Pronto quando:**
-- [ ] Busca textual (`Ctrl+K` foca) filtra em tempo real.
-- [ ] Filtros por tag/stack/fonte e ordenação funcionam.
-- [ ] Editar tags/status por projeto (persiste).
+- [x] Busca textual (`Ctrl+K` foca) filtra em tempo real.
+- [ ] Filtros por tag/stack/fonte e ordenação → `docs/plans/backlog.md` (busca cobre "achar <5s" em escala pessoal).
+- [~] Editar status por projeto → alvo da fatia automode **F1**; editar tags → backlog.
 
 ## Fatia 3 — Abrir / trabalhar ✅ (concluída, ver R6)
 Abridores conforme disponibilidade; GitHub sem clone → `gh repo clone` sob demanda antes de abrir.
@@ -66,6 +66,29 @@ Painel estilo `shadcn/create` com preview real; salva `foundation.json`, gera `D
 Agente embutido (`AgentAdapter`: `detect/run/resume/cancel` + streaming) quando/se o CLI ficar acessível;
 detalhe de projeto; múltiplas contas GitHub; empacotamento desktop (Tauri/Electron); presets de foundation
 compartilháveis.
+
+---
+
+## Modo Maestri — canvas de orquestração (branch `canvas`, desktop-only)
+
+Paridade funcional com o Maestri (themaestri.app), reimplementado em web/Windows. Canvas React Flow +
+terminais PTY reais (Claude Code CLI) + notas markdown vivas + conexões agente↔agente + Ombro (IA) +
+rotinas + floors (git worktrees). Vive só na branch `canvas`, gated `!IS_CLOUD` (PTY não roda em serverless).
+
+- [x] **M0** — Branch + rota `/projects/:id/canvas` (React Flow vazio) + spikes de PTY (`@lydell/node-pty`) e WebSocket (`@fastify/websocket`).
+- [ ] **M1** — Layout persistido por projeto (`.workspace/canvas/`) + notas markdown vivas (`fs.watch`).
+- [ ] **M2** — Terminais PTY reais (xterm.js + node-pty via WS, ring buffer + reattach).
+- [ ] **M3** — Claude Code CLI global + papéis de agente.
+- [ ] **M4** — Conexões terminal↔terminal (encaminhar output→stdin) e terminal↔nota.
+- [ ] **M5** — Grupos, Tidy, minimapa, atalhos, File Tree.
+- [ ] **M6** — Ombro (resumo + próxima ação via AI Gateway).
+- [ ] **M7** — Rotinas (prompts agendados).
+- [ ] **M8** — Floors (um canvas por git worktree).
+- [ ] **M9** — Desenho à mão livre + polish.
+
+### App desktop (Electron) — empacotar como aplicativo instalável
+- [x] **A0** — Shell Electron: `desktop/` sobe o Fastify (servindo o frontend na mesma origem via `@fastify/static`) e abre a janela. Backend empacotado com esbuild.
+- [~] **A1** — Instalável no Windows: app roda instalado em `%LOCALAPPDATA%\Programs\Studio` + atalho no Menu Iniciar (aparece na busca). Instalador NSIS (`electron-builder`) pendente — bloqueado por lock de AV/sandbox na extração do 7zip.
 
 ---
 

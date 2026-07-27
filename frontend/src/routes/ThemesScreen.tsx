@@ -10,6 +10,7 @@ import { clearPreset, getStoredPresetName, storePreset } from '@/lib/theme'
 /** Base do registry (public/r/*.json sai no mesmo deploy do hub). */
 const REGISTRY_URL = 'https://studioworkspace-mauve.vercel.app'
 import { useTheme } from '@/app/ThemeProvider'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -60,6 +61,7 @@ function MiniPreview({ v }: { v: ThemeVars }) {
 }
 
 export function ThemesScreen() {
+  useDocumentTitle('Temas')
   const { resolved } = useTheme()
   const [active, setActive] = useState<string | null>(() => getStoredPresetName())
   const [copied, setCopied] = useState(false)

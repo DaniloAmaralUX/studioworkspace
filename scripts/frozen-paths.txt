@@ -1,0 +1,13 @@
+# frozen-paths.txt — pathspecs git dos caminhos CONGELADOS no automode (core-only).
+# Fonte unica. Usado pelo scope-check pre-commit e pela revisao R1 (Guardiao).
+# Regra: nenhum arquivo dentro destes paths pode aparecer no diff da fatia.
+# Leitura e permitida; edicao nao (nem "consertar de passagem").
+frontend/src/canvas
+frontend/src/routes/CanvasScreen.tsx
+backend/src/routes/canvas.ts
+backend/src/core/canvasStore.ts
+backend/test/canvas.test.ts
+desktop
+api
+frontend/public/r
+frontend/registry.json

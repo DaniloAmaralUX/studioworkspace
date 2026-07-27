@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, FolderX } from 'lucide-react'
 import { StatusBadge } from './StatusBadge'
 import { timeAgo } from '@/lib/utils'
 import type { Project } from '@/lib/types'
@@ -24,22 +24,29 @@ export function ProjectRow({ project }: { project: Project }) {
             {project.stack.slice(0, 3).map((s) => (
               <span
                 key={s}
-                className="rounded border border-border/60 bg-muted/50 px-1.5 py-px font-mono text-[10.5px] text-muted-foreground"
+                className="rounded border border-border/60 bg-muted/50 px-1.5 py-px font-mono text-[10.5px] text-foreground/75"
               >
                 {s}
               </span>
             ))}
           </span>
         </div>
-        {project.nextAction && (
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">
-            {project.nextAction}
+        {project.pathMissing ? (
+          <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-destructive">
+            <FolderX className="size-3 shrink-0" />
+            Pasta não encontrada no disco
           </p>
+        ) : (
+          project.nextAction && (
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+              {project.nextAction}
+            </p>
+          )
         )}
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
         <StatusBadge status={project.status} />
-        <span className="tnum text-[11px] text-muted-foreground/70">
+        <span className="tnum text-[11px] text-muted-foreground">
           {timeAgo(project.lastActivityAt)}
         </span>
       </div>
