@@ -9,10 +9,6 @@ import { ProjectDetail } from '@/routes/ProjectDetail'
 import { LoginScreen } from '@/routes/LoginScreen'
 import { IS_CLOUD } from '@/lib/api'
 
-// Modo Maestri: desktop-only e pesado (React Flow) — carregado sob demanda e
-// mantido fora do bundle da nuvem (mesma SPA), onde PTY não roda.
-const CanvasScreen = lazy(() => import('@/routes/CanvasScreen'))
-
 // Telas secundárias fora do chunk inicial (F4): o ciclo diário é
 // achar → decidir → abrir, então só Projects e ProjectDetail ficam eager.
 // (.then(m => ({default: ...})) adapta named export ao lazy sem tocar as telas.)
@@ -109,22 +105,6 @@ export default function App() {
               }
             />
           </Route>
-          {!IS_CLOUD && (
-            <Route
-              path="projects/:id/canvas"
-              element={
-                <Suspense
-                  fallback={
-                    <div className="grid h-svh place-items-center text-sm text-muted-foreground">
-                      Carregando canvas…
-                    </div>
-                  }
-                >
-                  <CanvasScreen />
-                </Suspense>
-              }
-            />
-          )}
         </Routes>
         <Toaster />
       </ThemeProvider>

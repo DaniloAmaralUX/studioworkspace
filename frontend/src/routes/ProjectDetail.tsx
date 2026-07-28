@@ -5,7 +5,6 @@ import {
   ChevronDown,
   FolderX,
   GitBranch,
-  LayoutDashboard,
   Trash2,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -15,7 +14,6 @@ import {
   useProjectGit,
   useProjects,
 } from '@/hooks/useProjects'
-import { IS_CLOUD } from '@/lib/api'
 import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { StatusBadge } from '@/components/StatusBadge'
 import { SourceBadge } from '@/components/SourceBadge'
@@ -112,15 +110,6 @@ export function ProjectDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {!IS_CLOUD &&
-            (project.source.kind === 'local' || project.source.cloneDir) && (
-              <Button asChild variant="outline" size="sm">
-                <Link to={`/projects/${project.id}/canvas`}>
-                  <LayoutDashboard className="size-3.5" />
-                  Canvas
-                </Link>
-              </Button>
-            )}
           <DropdownMenu>
             <DropdownMenuTrigger
               // p-2.5 -m-2.5: infla a área de clique para >=40px (DESIGN.md §8)

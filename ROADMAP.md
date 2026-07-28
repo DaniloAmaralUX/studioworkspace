@@ -88,9 +88,24 @@ responder “qual é o estado deste projeto e o que faço agora?” usando evid�
 - [x] Publicar cada item como fonte verificável (link + horário); o CI mostra sucesso, falha ou execução.
 - [x] Degradar por aviso quando o token não tiver escopo, sem bloquear a resposta.
 - [x] Levar número, título e metadados ao prompt — nunca o corpo de issue ou PR.
-- [ ] Ampliar o PAT (`Issues: Read`, `Pull requests: Read`, `Actions: Read`) para sair de "Parcial" em produção.
+- [x] Ampliar o PAT (`Issues: Read`, `Pull requests: Read`, `Actions: Read`) para sair de "Parcial" em produção.
 
-Memória por projeto (R3) e automações seguem congelados até R1 e R2 serem validados no uso diário.
+### R3 — Memória e decisões do projeto
+
+- [ ] Manter uma memória curta e verificável por projeto, com política explícita de retenção e exclusão.
+- [ ] Registrar decisões importantes em ADRs com contexto, decisão e consequências.
+- [ ] Anexar documentos de contexto em Markdown sem criar uma segunda fonte da verdade.
+- [ ] Permitir revisar, corrigir e excluir qualquer memória antes de ela influenciar respostas futuras.
+- [ ] Gerar memória e rascunhos de ADR pelo Kimi via Amazon Bedrock, sempre com confirmação antes de salvar.
+
+### R4 — Qualidade de engenharia
+
+- [ ] Auditar acessibilidade WCAG 2.2 AA e guidelines de interface com achados verificáveis.
+- [ ] Reutilizar os checks do R2 para explicar falhas de testes, lint, tipos e build.
+- [ ] Sugerir correções ou uma próxima ação; nunca criar commits ou PRs sem confirmação.
+- [ ] Executar análises e gerar relatórios pelo Kimi via Amazon Bedrock, sem depender do chat de desenvolvimento.
+
+R3 e R4 seguem congelados até R1 e R2 serem validados no uso diário.
 
 ---
 
@@ -101,24 +116,13 @@ compartilháveis.
 
 ---
 
-## Modo Maestri — canvas de orquestração (branch `canvas`, desktop-only)
+## Canvas próprio — encerrado
 
-Paridade funcional com o Maestri (themaestri.app), reimplementado em web/Windows. Canvas React Flow +
-terminais PTY reais (Claude Code CLI) + notas markdown vivas + conexões agente↔agente + Ombro (IA) +
-rotinas + floors (git worktrees). Vive só na branch `canvas`, gated `!IS_CLOUD` (PTY não roda em serverless).
+O experimento Modo Maestri foi encerrado por decisão de produto em 2026-07-28. O Paper cobre canvas,
+fluxos e exploração visual. O Studio não expõe rota ou opção de canvas, e esse backlog não deve ser
+retomado sem uma nova decisão explícita.
 
-- [x] **M0** — Branch + rota `/projects/:id/canvas` (React Flow vazio) + spikes de PTY (`@lydell/node-pty`) e WebSocket (`@fastify/websocket`).
-- [ ] **M1** — Layout persistido por projeto (`.workspace/canvas/`) + notas markdown vivas (`fs.watch`).
-- [ ] **M2** — Terminais PTY reais (xterm.js + node-pty via WS, ring buffer + reattach).
-- [ ] **M3** — Claude Code CLI global + papéis de agente.
-- [ ] **M4** — Conexões terminal↔terminal (encaminhar output→stdin) e terminal↔nota.
-- [ ] **M5** — Grupos, Tidy, minimapa, atalhos, File Tree.
-- [ ] **M6** — Ombro (resumo + próxima ação via AI Gateway).
-- [ ] **M7** — Rotinas (prompts agendados).
-- [ ] **M8** — Floors (um canvas por git worktree).
-- [ ] **M9** — Desenho à mão livre + polish.
-
-### App desktop (Electron) — empacotar como aplicativo instalável
+## App desktop (Electron) — empacotar como aplicativo instalável
 - [x] **A0** — Shell Electron: `desktop/` sobe o Fastify (servindo o frontend na mesma origem via `@fastify/static`) e abre a janela. Backend empacotado com esbuild.
 - [~] **A1** — Instalável no Windows: app roda instalado em `%LOCALAPPDATA%\Programs\Studio` + atalho no Menu Iniciar (aparece na busca). Instalador NSIS (`electron-builder`) pendente — bloqueado por lock de AV/sandbox na extração do 7zip.
 
