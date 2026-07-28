@@ -3,8 +3,13 @@
 Ideias boas que surgiram durante fatias e foram anotadas em vez de implementadas.
 Só saem daqui quando o core estiver validado pelo uso diário.
 
+## Encerradas (decisão de produto — não retomar sem novo ADR)
+- Modo Maestri / canvas de agentes — encerrado em 2026-07-28 por
+  [ADR-001](../decisions/ADR-001-paper-for-visual-canvas.md). O Paper cobre canvas, fluxos e
+  exploração visual; canvas infinito, editor visual e Figma saíram do escopo. O código continua no
+  repositório como histórico, sem rota e sem backlog ativo.
+
 ## Congeladas (já existentes, aguardando validação do core)
-- Modo Maestri / canvas de agentes (branch `canvas` — M2 terminais em diante)
 - Aba Design System (plano DS-1..DS-8 fechado, não iniciado)
 - Instalador NSIS do app Electron
 - Expansões do Studio Cloud

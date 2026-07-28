@@ -88,7 +88,9 @@ responder “qual é o estado deste projeto e o que faço agora?” usando evid�
 - [x] Publicar cada item como fonte verificável (link + horário); o CI mostra sucesso, falha ou execução.
 - [x] Degradar por aviso quando o token não tiver escopo, sem bloquear a resposta.
 - [x] Levar número, título e metadados ao prompt — nunca o corpo de issue ou PR.
-- [x] Ampliar o PAT (`Issues: Read`, `Pull requests: Read`, `Actions: Read`) para sair de "Parcial" em produção.
+- [ ] Ampliar o PAT (`Issues: Read`, `Pull requests: Read`, `Actions: Read`) para sair de "Parcial" em produção.
+      Como conferir: abrir o chat com um projeto GitHub — **Completo** = escopos ampliados; **Parcial**
+      com aviso de permissão = ainda falta ampliar o token na Vercel.
 
 ### R3 — Memória e decisões do projeto
 
