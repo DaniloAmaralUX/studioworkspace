@@ -92,6 +92,13 @@ responder “qual é o estado deste projeto e o que faço agora?” usando evid�
       Como conferir: abrir o chat com um projeto GitHub — **Completo** = escopos ampliados; **Parcial**
       com aviso de permissão = ainda falta ampliar o token na Vercel.
 
+### Biblioteca de Skills
+
+- [x] Expor 15 skills de interface em uma tela própria na sidebar, organizadas em duas coleções.
+- [x] Explicar objetivo e uso de cada skill com links para a fonte.
+- [x] Gerar comandos copiáveis para instalar uma skill ou uma coleção completa no projeto.
+- [x] Manter o fluxo compatível com cloud e desktop, sem escrita remota automática.
+
 ### R3 — Memória e decisões do projeto
 
 - [ ] Manter uma memória curta e verificável por projeto, com política explícita de retenção e exclusão.

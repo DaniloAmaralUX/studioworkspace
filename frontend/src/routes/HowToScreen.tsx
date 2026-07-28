@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from 'react'
 import {
+  Blocks,
   FolderKanban,
   Monitor,
   Cloud,
@@ -79,7 +80,7 @@ export function HowToScreen() {
         <h1 className="text-xl font-semibold tracking-tight">Como usar</h1>
         <p className="mt-1 max-w-prose text-sm text-muted-foreground">
           O Studio organiza seus projetos e opera seu design system — no
-          desktop e na nuvem. O essencial em 7 passos.
+          desktop e na nuvem. O essencial em 8 passos.
         </p>
       </header>
 
@@ -149,7 +150,16 @@ export function HowToScreen() {
           </p>
         </Step>
 
-        <Step n={6} icon={Palette} title="Trocar de tema" where="ambos">
+        <Step n={6} icon={Blocks} title="Levar skills ao projeto" where="ambos">
+          <p>
+            Em <strong className="text-foreground">Skills</strong>, escolha uma
+            regra especializada ou uma coleção completa. Copie o comando e
+            execute na raiz do projeto para levar fundamentos de interface,
+            motion e design engineering junto do repositório.
+          </p>
+        </Step>
+
+        <Step n={7} icon={Palette} title="Trocar de tema" where="ambos">
           <p>
             Em <strong className="text-foreground">Temas</strong>, 36 presets
             estilo tweakcn — clique e o app inteiro muda na hora.{' '}
@@ -159,7 +169,7 @@ export function HowToScreen() {
           </p>
         </Step>
 
-        <Step n={7} icon={GithubIcon} title="O princípio de tudo" where="ambos">
+        <Step n={8} icon={GithubIcon} title="O princípio de tudo" where="ambos">
           <p>
             Sua memória de design mora em{' '}
             <strong className="text-foreground">

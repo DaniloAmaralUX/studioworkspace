@@ -122,6 +122,13 @@ Todas as mutations invalidam a query `['projects']` (React Query) para o hub ref
 - Respostas contextuais mostram projeto, horário da consulta, estado completo/parcial, avisos, fontes
   recolhíveis e uma próxima ação que só é salva por clique explícito.
 
+## Skills
+
+- `/skills` lista 15 skills curadas de interface e design engineering, agrupadas por autor.
+- Cada card explica quando usar a skill, aponta para a fonte no GitHub e oferece um comando copiável.
+- Cada coleção pode ser instalada de uma vez com `npx skills add`, mantendo os arquivos dentro do projeto.
+- A tela funciona igual na cloud e no desktop: ela não escreve no GitHub nem executa comandos sozinha.
+
 ## Login do Studio Cloud
 
 - `/login` é uma tela cloud-only com senha única para o workspace pessoal.

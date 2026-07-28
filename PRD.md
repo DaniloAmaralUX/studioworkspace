@@ -134,6 +134,8 @@ Persistência: índice global `projects.json`; dentro de cada projeto **local**,
 - **RF-10 — Context Project cloud:** selecionar um projeto GitHub, consultar metadados, README e até
   12 commits no momento da pergunta, responder com fontes e permitir salvar explicitamente a próxima
   ação sugerida.
+- **RF-11 — Biblioteca de Skills:** organizar skills curadas por coleção, explicar quando usar cada
+  uma e fornecer comandos copiáveis para instalar uma skill ou uma coleção completa na raiz do projeto.
 
 ## 9. Requisitos não funcionais
 
