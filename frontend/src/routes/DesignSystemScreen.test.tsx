@@ -8,6 +8,7 @@ import {
 } from '@testing-library/react'
 import { DesignSystemScreen } from './DesignSystemScreen'
 import { catalog, categories, installCommand } from '@/registry/catalog'
+import { hasDemo, loadDemoSource } from '@/registry/demo-index'
 
 vi.mock('sonner', () => ({
   toast: {
@@ -81,5 +82,33 @@ describe('DesignSystemScreen', () => {
     const docOnly = catalog.filter((entry) => entry.docOnly)
     expect(docOnly.length).toBeGreaterThan(0)
     expect(screen.getAllByText('Sem demo').length).toBe(docOnly.length)
+  })
+
+  it('renderiza o exemplo vivo de quem tem demo', async () => {
+    render(<DesignSystemScreen />)
+
+    // O demo de Button é lazy: só existe depois do chunk resolver.
+    expect(
+      await screen.findByRole('button', { name: 'Salvar' }),
+    ).toBeTruthy()
+    expect(screen.getAllByRole('tab', { name: 'Preview' }).length).toBe(
+      catalog.filter((entry) => hasDemo(entry.name)).length,
+    )
+  })
+
+  it('nenhuma entrada doc-only tem demo registrado', () => {
+    for (const entry of catalog.filter((item) => item.docOnly)) {
+      expect(hasDemo(entry.name)).toBe(false)
+    }
+  })
+
+  it('carrega o fonte real do demo e o mantém em cache', async () => {
+    const source = await loadDemoSource('button')
+
+    expect(source).toContain("from '@/components/ui/button'")
+    expect(source).toContain('export default function ButtonDemo')
+    // Segunda chamada vem do cache, com o mesmo conteúdo.
+    expect(await loadDemoSource('button')).toBe(source)
+    expect(await loadDemoSource('componente-inexistente')).toBe(null)
   })
 })
