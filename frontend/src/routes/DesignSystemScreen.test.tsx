@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 import {
   cleanup,
   fireEvent,
@@ -15,6 +23,18 @@ vi.mock('sonner', () => ({
     error: vi.fn(),
   },
 }))
+
+// Radix precisa destes no jsdom para montar overlays (dialog, select, sheet).
+beforeAll(() => {
+  const proto = window.HTMLElement.prototype as unknown as Record<
+    string,
+    unknown
+  >
+  proto.scrollIntoView ??= vi.fn()
+  proto.hasPointerCapture ??= vi.fn(() => false)
+  proto.setPointerCapture ??= vi.fn()
+  proto.releasePointerCapture ??= vi.fn()
+})
 
 describe('DesignSystemScreen', () => {
   const writeText = vi.fn().mockResolvedValue(undefined)
@@ -100,6 +120,28 @@ describe('DesignSystemScreen', () => {
     for (const entry of catalog.filter((item) => item.docOnly)) {
       expect(hasDemo(entry.name)).toBe(false)
     }
+  })
+
+  it('todo componente que não é doc-only tem demo', () => {
+    const semDemo = catalog
+      .filter((entry) => !entry.docOnly)
+      .filter((entry) => !hasDemo(entry.name))
+      .map((entry) => entry.name)
+
+    expect(semDemo).toEqual([])
+  })
+
+  it('abre um overlay a partir do demo sem derrubar a galeria', async () => {
+    render(<DesignSystemScreen />)
+
+    const trigger = await screen.findByRole('button', {
+      name: 'Adicionar projeto',
+    })
+    fireEvent.click(trigger)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Adicionar projeto' }),
+    ).toBeTruthy()
   })
 
   it('carrega o fonte real do demo e o mantém em cache', async () => {
