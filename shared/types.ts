@@ -69,10 +69,12 @@ export type ChatRequest = {
 
 export type ContextSource = {
   id: string
-  kind: 'repository' | 'readme' | 'commit'
+  kind: 'repository' | 'readme' | 'commit' | 'issue' | 'pull' | 'check'
   label: string
   url?: string
   occurredAt?: string
+  /** Só em `check`: resultado da execução de CI. */
+  state?: 'success' | 'failure' | 'pending'
 }
 
 export type ChatContext = {

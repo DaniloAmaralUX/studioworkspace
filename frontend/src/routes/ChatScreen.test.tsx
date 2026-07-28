@@ -74,6 +74,28 @@ const CONTEXTUAL_RESPONSE: ChatResponse = {
         url: 'https://github.com/danilo/projeto/commit/abc1234',
         occurredAt: '2026-07-27T22:00:00.000Z',
       },
+      {
+        id: 'issue-42',
+        kind: 'issue',
+        label: '#42 · Corrigir foco do editor',
+        url: 'https://github.com/danilo/projeto/issues/42',
+        occurredAt: '2026-07-27T21:00:00.000Z',
+      },
+      {
+        id: 'pull-43',
+        kind: 'pull',
+        label: '#43 · Adiciona filtro por tag',
+        url: 'https://github.com/danilo/projeto/pull/43',
+        occurredAt: '2026-07-27T19:00:00.000Z',
+      },
+      {
+        id: 'check-9001',
+        kind: 'check',
+        label: 'CI · main · falha',
+        url: 'https://github.com/danilo/projeto/actions/runs/9001',
+        occurredAt: '2026-07-27T18:00:00.000Z',
+        state: 'failure',
+      },
     ],
   },
   suggestedNextAction: 'Validar o contexto em produção.',
@@ -207,7 +229,7 @@ describe('ChatScreen', () => {
     expect(context.textContent).toContain('README não encontrado.')
 
     fireEvent.click(
-      screen.getByRole('button', { name: '2 fontes consultadas' }),
+      screen.getByRole('button', { name: '5 fontes consultadas' }),
     )
     expect(
       (
@@ -228,6 +250,34 @@ describe('ChatScreen', () => {
         await screen.findByRole('button', { name: 'Próxima ação salva' })
       ) as HTMLButtonElement,
     ).toHaveProperty('disabled', true)
+  })
+
+  it('agrupa as fontes de saúde de desenvolvimento por tipo', async () => {
+    vi.mocked(api.chat).mockResolvedValue(CONTEXTUAL_RESPONSE)
+    renderScreen()
+
+    await chooseContext('Projeto GitHub')
+    await send('O que está travado?')
+    await screen.findByText('O projeto está em desenvolvimento ativo.')
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '5 fontes consultadas' }),
+    )
+
+    const issues = await screen.findByRole('region', { name: 'Issues abertas' })
+    expect(issues.textContent).toContain('#42 · Corrigir foco do editor')
+
+    const pulls = screen.getByRole('region', { name: 'Pull requests abertos' })
+    expect(pulls.textContent).toContain('#43 · Adiciona filtro por tag')
+
+    const ci = screen.getByRole('region', { name: 'CI recente' })
+    expect(ci.textContent).toContain('CI · main · falha')
+    expect(
+      screen.getByRole('link', { name: /CI · main · falha/ }).getAttribute('href'),
+    ).toBe('https://github.com/danilo/projeto/actions/runs/9001')
+
+    // Grupo sem fonte não vira seção vazia.
+    expect(screen.queryByRole('region', { name: 'README' })).toBeNull()
   })
 
   it('reconhece quando a ação sugerida já está salva', async () => {

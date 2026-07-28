@@ -75,6 +75,34 @@ const snapshot = {
       committedAt: '2026-07-28T09:00:00.000Z',
     },
   ],
+  issues: [
+    {
+      number: 42,
+      title: 'Corrigir foco do editor',
+      url: 'https://github.com/owner/studio/issues/42',
+      updatedAt: '2026-07-27T21:00:00.000Z',
+    },
+  ],
+  pullRequests: [
+    {
+      number: 43,
+      title: 'Adiciona filtro por tag',
+      draft: false,
+      url: 'https://github.com/owner/studio/pull/43',
+      updatedAt: '2026-07-27T19:00:00.000Z',
+    },
+  ],
+  ciRuns: [
+    {
+      id: 9001,
+      name: 'CI',
+      status: 'completed',
+      conclusion: 'failure',
+      headBranch: 'main',
+      url: 'https://github.com/owner/studio/actions/runs/9001',
+      startedAt: '2026-07-27T18:00:00.000Z',
+    },
+  ],
   fetchedAt: '2026-07-28T12:00:00.000Z',
   partial: false,
   warnings: [],
@@ -165,9 +193,15 @@ describe('POST /api/chat', () => {
       },
       suggestedNextAction: 'Validar o fluxo contextual.',
     })
-    expect(
-      (captured.body as { context: { sources: unknown[] } }).context.sources,
-    ).toHaveLength(3)
+    const { sources } = (
+      captured.body as {
+        context: { sources: { kind: string }[] }
+      }
+    ).context
+    expect(sources).toHaveLength(6)
+    expect(sources.map((source) => source.kind)).toEqual(
+      expect.arrayContaining(['issue', 'pull', 'check']),
+    )
   })
 
   it('recusa fonte local na variante cloud sem chamar o GitHub', async () => {

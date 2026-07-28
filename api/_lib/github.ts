@@ -45,10 +45,38 @@ export type GithubReadme = {
   url: string
 }
 
+export type GithubIssue = {
+  number: number
+  title: string
+  url: string
+  updatedAt: string | null
+}
+
+export type GithubPullRequest = {
+  number: number
+  title: string
+  draft: boolean
+  url: string
+  updatedAt: string | null
+}
+
+export type GithubWorkflowRun = {
+  id: number
+  name: string
+  status: string | null
+  conclusion: string | null
+  headBranch: string | null
+  url: string
+  startedAt: string | null
+}
+
 export type GithubContextSnapshot = {
   repository: GithubRepo
   readme: GithubReadme | null
   commits: GithubCommit[]
+  issues: GithubIssue[]
+  pullRequests: GithubPullRequest[]
+  ciRuns: GithubWorkflowRun[]
   fetchedAt: string
   partial: boolean
   warnings: string[]
@@ -78,6 +106,36 @@ type RawReadme = {
   encoding: string
   path: string
   html_url: string
+}
+
+type RawIssue = {
+  number: number
+  title: string
+  html_url: string
+  updated_at: string | null
+  /** Presente só quando o item é, na verdade, um pull request. */
+  pull_request?: unknown
+}
+
+type RawPull = {
+  number: number
+  title: string
+  html_url: string
+  updated_at: string | null
+  draft?: boolean
+}
+
+type RawWorkflowRuns = {
+  workflow_runs?: {
+    id: number
+    name: string | null
+    status: string | null
+    conclusion: string | null
+    head_branch: string | null
+    html_url: string
+    run_started_at?: string | null
+    updated_at?: string | null
+  }[]
 }
 
 export function tokenPresent(): boolean {
@@ -242,6 +300,73 @@ export async function repoCommits(
   }
 }
 
+function trimTitle(value: string | null, fallback: string): string {
+  return value?.trim().slice(0, 240) || fallback
+}
+
+/** Issues abertas. O endpoint /issues devolve pull requests junto — filtrados aqui. */
+export async function repoIssues(
+  token: string,
+  nameWithOwner: string,
+  limit = 10,
+): Promise<GithubIssue[]> {
+  const path = repositoryPath(nameWithOwner)
+  const raw = await gh<RawIssue[]>(
+    `/repos/${path}/issues?state=open&sort=updated&direction=desc&per_page=30`,
+    token,
+  )
+  return raw
+    .filter((item) => !item.pull_request)
+    .slice(0, limit)
+    .map((item) => ({
+      number: item.number,
+      title: trimTitle(item.title, 'Issue sem título'),
+      url: item.html_url,
+      updatedAt: item.updated_at,
+    }))
+}
+
+export async function repoPulls(
+  token: string,
+  nameWithOwner: string,
+  limit = 10,
+): Promise<GithubPullRequest[]> {
+  const path = repositoryPath(nameWithOwner)
+  const raw = await gh<RawPull[]>(
+    `/repos/${path}/pulls?state=open&sort=updated&direction=desc&per_page=${Math.min(limit, 50)}`,
+    token,
+  )
+  return raw.slice(0, limit).map((item) => ({
+    number: item.number,
+    title: trimTitle(item.title, 'Pull request sem título'),
+    draft: Boolean(item.draft),
+    url: item.html_url,
+    updatedAt: item.updated_at,
+  }))
+}
+
+/** Execuções recentes do Actions. A resposta é um envelope, não um array. */
+export async function repoWorkflowRuns(
+  token: string,
+  nameWithOwner: string,
+  limit = 10,
+): Promise<GithubWorkflowRun[]> {
+  const path = repositoryPath(nameWithOwner)
+  const raw = await gh<RawWorkflowRuns>(
+    `/repos/${path}/actions/runs?per_page=${Math.min(limit, 50)}`,
+    token,
+  )
+  return (raw.workflow_runs ?? []).slice(0, limit).map((item) => ({
+    id: item.id,
+    name: trimTitle(item.name, 'Workflow sem nome'),
+    status: item.status,
+    conclusion: item.conclusion,
+    headBranch: item.head_branch,
+    url: item.html_url,
+    startedAt: item.run_started_at ?? item.updated_at ?? null,
+  }))
+}
+
 export async function repoReadme(
   token: string,
   nameWithOwner: string,
@@ -284,6 +409,11 @@ function warningFor(source: string, error: unknown): string {
     if (error.code === 'github_rate_limited') {
       return `Não foi possível consultar ${source} por limite do GitHub.`
     }
+    // Fine-grained PAT sem o escopo da rota responde 403 (ou 404, quando o
+    // GitHub prefere não revelar a existência do recurso).
+    if (error.status === 403 || error.status === 404) {
+      return `Não foi possível consultar ${source} — verifique as permissões do token do GitHub.`
+    }
   }
   return `Não foi possível consultar ${source}.`
 }
@@ -306,12 +436,21 @@ export async function repoContext(
     )
   }
 
-  const [repoResult, readmeResult, commitsResult] =
-    await Promise.allSettled([
-      repoView(normalizedToken, nameWithOwner),
-      repoReadme(normalizedToken, nameWithOwner),
-      repoCommits(normalizedToken, nameWithOwner),
-    ])
+  const [
+    repoResult,
+    readmeResult,
+    commitsResult,
+    issuesResult,
+    pullsResult,
+    ciResult,
+  ] = await Promise.allSettled([
+    repoView(normalizedToken, nameWithOwner),
+    repoReadme(normalizedToken, nameWithOwner),
+    repoCommits(normalizedToken, nameWithOwner),
+    repoIssues(normalizedToken, nameWithOwner),
+    repoPulls(normalizedToken, nameWithOwner),
+    repoWorkflowRuns(normalizedToken, nameWithOwner),
+  ])
 
   if (repoResult.status === 'rejected') {
     if (repoResult.reason instanceof GithubError) {
@@ -324,7 +463,13 @@ export async function repoContext(
     )
   }
 
-  for (const result of [readmeResult, commitsResult]) {
+  for (const result of [
+    readmeResult,
+    commitsResult,
+    issuesResult,
+    pullsResult,
+    ciResult,
+  ]) {
     if (
       result.status === 'rejected' &&
       result.reason instanceof GithubError &&
@@ -355,10 +500,32 @@ export async function repoContext(
     warnings.push('Nenhum commit recente foi encontrado.')
   }
 
+  // Saúde de desenvolvimento: lista vazia aqui é estado saudável (nada aberto,
+  // nenhum CI configurado), então — ao contrário de README e commits — não vira
+  // aviso nem marca o contexto como parcial. Só a falha da consulta avisa.
+  const issues = issuesResult.status === 'fulfilled' ? issuesResult.value : []
+  if (issuesResult.status === 'rejected') {
+    warnings.push(warningFor('as issues abertas', issuesResult.reason))
+  }
+
+  const pullRequests =
+    pullsResult.status === 'fulfilled' ? pullsResult.value : []
+  if (pullsResult.status === 'rejected') {
+    warnings.push(warningFor('os pull requests abertos', pullsResult.reason))
+  }
+
+  const ciRuns = ciResult.status === 'fulfilled' ? ciResult.value : []
+  if (ciResult.status === 'rejected') {
+    warnings.push(warningFor('as execuções de CI', ciResult.reason))
+  }
+
   return {
     repository,
     readme,
     commits,
+    issues,
+    pullRequests,
+    ciRuns,
     fetchedAt: new Date().toISOString(),
     partial: warnings.length > 0,
     warnings,

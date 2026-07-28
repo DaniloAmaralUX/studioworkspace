@@ -10,9 +10,14 @@ import {
   BookOpenText,
   Check,
   ChevronsUpDown,
+  CircleCheck,
+  CircleDashed,
+  CircleDot,
+  CircleX,
   ExternalLink,
   FolderGit2,
   GitCommitHorizontal,
+  GitPullRequest,
   LoaderCircle,
   MessageSquareText,
   Save,
@@ -115,10 +120,96 @@ function safeExternalUrl(value?: string) {
   }
 }
 
-function sourceIcon(kind: ContextSource['kind']) {
-  if (kind === 'commit') return GitCommitHorizontal
-  if (kind === 'readme') return BookOpenText
+function sourceIcon(source: ContextSource) {
+  if (source.kind === 'commit') return GitCommitHorizontal
+  if (source.kind === 'readme') return BookOpenText
+  if (source.kind === 'issue') return CircleDot
+  if (source.kind === 'pull') return GitPullRequest
+  if (source.kind === 'check') {
+    if (source.state === 'success') return CircleCheck
+    if (source.state === 'failure') return CircleX
+    return CircleDashed
+  }
   return FolderGit2
+}
+
+function sourceIconTone(source: ContextSource) {
+  if (source.kind !== 'check') return 'text-muted-foreground'
+  if (source.state === 'success') return 'text-status-done'
+  if (source.state === 'failure') return 'text-status-blocked'
+  return 'text-muted-foreground'
+}
+
+// Ordem de leitura: identidade do repo primeiro, trabalho aberto no meio,
+// histórico no fim. Grupo vazio não aparece.
+const SOURCE_GROUPS: { kind: ContextSource['kind']; label: string }[] = [
+  { kind: 'repository', label: 'Repositório' },
+  { kind: 'readme', label: 'README' },
+  { kind: 'issue', label: 'Issues abertas' },
+  { kind: 'pull', label: 'Pull requests abertos' },
+  { kind: 'check', label: 'CI recente' },
+  { kind: 'commit', label: 'Commits recentes' },
+]
+
+function groupSources(sources: ContextSource[]) {
+  const groups = SOURCE_GROUPS.map((group) => ({
+    ...group,
+    items: sources.filter((source) => source.kind === group.kind),
+  })).filter((group) => group.items.length > 0)
+
+  // Kind desconhecido (contrato mais novo que esta build) nunca some da lista.
+  const known = new Set(SOURCE_GROUPS.map((group) => group.kind))
+  const rest = sources.filter((source) => !known.has(source.kind))
+  if (rest.length > 0) {
+    groups.push({ kind: 'repository', label: 'Outras fontes', items: rest })
+  }
+  return groups
+}
+
+function SourceItem({ source }: { source: ContextSource }) {
+  const Icon = sourceIcon(source)
+  const url = safeExternalUrl(source.url)
+  const content = (
+    <>
+      <Icon
+        className={cn('mt-0.5 size-3.5 shrink-0', sourceIconTone(source))}
+        aria-hidden="true"
+      />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate">{source.label}</span>
+        {source.occurredAt && (
+          <span className="block font-mono text-[10px] text-muted-foreground tnum">
+            {formatDateTime(source.occurredAt)}
+          </span>
+        )}
+      </span>
+      {url && (
+        <ExternalLink
+          className="mt-0.5 size-3 shrink-0 text-muted-foreground"
+          aria-hidden="true"
+        />
+      )}
+    </>
+  )
+
+  return (
+    <li>
+      {url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="flex min-w-0 items-start gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {content}
+        </a>
+      ) : (
+        <div className="flex min-w-0 items-start gap-2 px-2 py-1.5 text-xs">
+          {content}
+        </div>
+      )}
+    </li>
+  )
 }
 
 function ContextDetails({ context }: { context: ChatContext }) {
@@ -178,53 +269,20 @@ function ContextDetails({ context }: { context: ChatContext }) {
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <ul className="mt-2 space-y-1.5 border-t pt-2">
-              {context.sources.map((source) => {
-                const Icon = sourceIcon(source.kind)
-                const url = safeExternalUrl(source.url)
-                const content = (
-                  <>
-                    <Icon
-                      className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate">{source.label}</span>
-                      {source.occurredAt && (
-                        <span className="block font-mono text-[10px] text-muted-foreground tnum">
-                          {formatDateTime(source.occurredAt)}
-                        </span>
-                      )}
-                    </span>
-                    {url && (
-                      <ExternalLink
-                        className="mt-0.5 size-3 shrink-0 text-muted-foreground"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </>
-                )
-
-                return (
-                  <li key={source.id}>
-                    {url ? (
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex min-w-0 items-start gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        {content}
-                      </a>
-                    ) : (
-                      <div className="flex min-w-0 items-start gap-2 px-2 py-1.5 text-xs">
-                        {content}
-                      </div>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
+            <div className="mt-2 space-y-3 border-t pt-2">
+              {groupSources(context.sources).map((group) => (
+                <section key={group.label} aria-label={group.label}>
+                  <h4 className="px-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    {group.label}
+                  </h4>
+                  <ul className="mt-1 space-y-1.5">
+                    {group.items.map((source) => (
+                      <SourceItem key={source.id} source={source} />
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
           </CollapsibleContent>
         </Collapsible>
       ) : (

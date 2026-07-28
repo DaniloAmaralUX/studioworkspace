@@ -77,12 +77,20 @@ responder “qual é o estado deste projeto e o que faço agora?” usando evid�
 
 ### R1 — Projeto selecionado + contexto fundamentado
 
-- [~] Selecionar conversa geral ou um projeto GitHub no cabeçalho do chat.
-- [~] Consultar metadados, README e até 12 commits a cada mensagem, sem persistir o conteúdo.
-- [~] Mostrar atualização, estado completo/parcial, avisos e links das fontes.
-- [~] Gerar resposta e próxima ação na mesma chamada; salvar somente por confirmação.
+- [x] Selecionar conversa geral ou um projeto GitHub no cabeçalho do chat.
+- [x] Consultar metadados, README e até 12 commits a cada mensagem, sem persistir o conteúdo.
+- [x] Mostrar atualização, estado completo/parcial, avisos e links das fontes.
+- [x] Gerar resposta e próxima ação na mesma chamada; salvar somente por confirmação.
 
-R2 (issues, PRs e checks), memória e automações ficam congelados até R1 ser validado no uso diário.
+### R2 — Saúde de desenvolvimento
+
+- [x] Consultar issues abertas, pull requests abertos e execuções recentes de CI junto do snapshot.
+- [x] Publicar cada item como fonte verificável (link + horário); o CI mostra sucesso, falha ou execução.
+- [x] Degradar por aviso quando o token não tiver escopo, sem bloquear a resposta.
+- [x] Levar número, título e metadados ao prompt — nunca o corpo de issue ou PR.
+- [ ] Ampliar o PAT (`Issues: Read`, `Pull requests: Read`, `Actions: Read`) para sair de "Parcial" em produção.
+
+Memória por projeto (R3) e automações seguem congelados até R1 e R2 serem validados no uso diário.
 
 ---
 
