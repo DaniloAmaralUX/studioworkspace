@@ -20,7 +20,7 @@ export const aiRoutes: FastifyPluginAsyncZod = async (app) => {
           error: {
             code: 'ai_not_configured',
             message:
-              'IA não configurada. Defina AI_GATEWAY_API_KEY em backend/.env para usar.',
+              'IA não configurada. Abra IA e APIs para conectar o Amazon Bedrock.',
           },
         })
       }

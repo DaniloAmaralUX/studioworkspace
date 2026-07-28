@@ -1,4 +1,4 @@
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -161,6 +161,94 @@ describe('templates', () => {
       url: `/api/templates/${tpl.id}`,
     })
     expect(del.json()).toEqual({ ok: true })
+  })
+})
+
+describe('configuração de IA', () => {
+  it('rejeita chave da OpenAI Platform no campo do Bedrock', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: '/api/settings/ai',
+      payload: {
+        apiKey: 'sk-proj-not-a-real-openai-key',
+        region: 'us-east-2',
+        projectId: 'proj_ehx5s4fo4ilbgxy45v2e',
+        model: 'openai.gpt-oss-120b',
+      },
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.body).not.toContain('sk-proj-not-a-real-openai-key')
+    expect(response.json().error.message).toContain('Amazon Bedrock')
+  })
+
+  it('salva a chave somente no env e nunca a devolve pela API', async () => {
+    const secret = 'bedrock-test-key-not-a-real-credential'
+    const saved = await app.inject({
+      method: 'PUT',
+      url: '/api/settings/ai',
+      payload: {
+        apiKey: secret,
+        region: 'us-east-2',
+        projectId: 'proj_ehx5s4fo4ilbgxy45v2e',
+        model: 'openai.gpt-oss-120b',
+      },
+    })
+
+    expect(saved.statusCode).toBe(200)
+    expect(saved.json()).toMatchObject({
+      configured: true,
+      provider: 'amazon-bedrock',
+      region: 'us-east-2',
+      projectId: 'proj_ehx5s4fo4ilbgxy45v2e',
+      model: 'openai.gpt-oss-120b',
+      storage: 'backend/.env',
+    })
+    expect(saved.body).not.toContain(secret)
+
+    const status = await app.inject({
+      method: 'GET',
+      url: '/api/settings/ai',
+    })
+    expect(status.body).not.toContain(secret)
+    expect(status.json().configured).toBe(true)
+
+    const envFile = readFileSync(process.env.PS_BACKEND_ENV_PATH!, 'utf8')
+    expect(envFile).toContain(secret)
+    expect(envFile).toContain('AWS_REGION=\"us-east-2\"')
+  })
+})
+
+describe('Context Project', () => {
+  it('injeta a data atual de Fortaleza e proíbe inventar fatos recentes', async () => {
+    const { buildChatSystem } = await import('../src/routes/chat')
+    const system = buildChatSystem(new Date('2026-07-28T15:30:00.000Z'))
+
+    expect(system).toContain('28 de julho de 2026')
+    expect(system).toContain('America/Fortaleza')
+    expect(system).toContain('informação autoritativa')
+    expect(system).toContain('não possui uma fonte atualizada')
+  })
+
+  it('valida mensagens e exige Bedrock configurado', async () => {
+    delete process.env.AWS_BEARER_TOKEN_BEDROCK
+
+    const invalid = await app.inject({
+      method: 'POST',
+      url: '/api/chat',
+      payload: { messages: [] },
+    })
+    expect(invalid.statusCode).toBe(400)
+
+    const unavailable = await app.inject({
+      method: 'POST',
+      url: '/api/chat',
+      payload: {
+        messages: [{ role: 'user', content: 'Olá' }],
+      },
+    })
+    expect(unavailable.statusCode).toBe(503)
+    expect(unavailable.json().error.code).toBe('ai_not_configured')
   })
 })
 

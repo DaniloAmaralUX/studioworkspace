@@ -3,44 +3,26 @@ import { promisify } from 'node:util'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { generateText, gateway, type LanguageModel } from 'ai'
-import { amazonBedrock } from '@ai-sdk/amazon-bedrock'
 import type { Project } from '../lib/types'
+import { bedrockClient, getAiSettings } from './aiSettings'
+import { cleanAssistantText } from './aiText'
 
 // Dois provedores possíveis, escolhidos pelo que está no ambiente:
-//   1. Amazon Bedrock — se houver AWS_BEARER_TOKEN_BEDROCK (API key do Bedrock)
-//      ou o par AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (chave IAM clássica).
-//      Chama a AWS direto, então consome os créditos do Bedrock.
+//   1. Amazon Bedrock — se houver AWS_BEARER_TOKEN_BEDROCK (API key do Bedrock).
+//      Usa o endpoint Mantle OpenAI-compatible e consome os créditos da AWS.
 //   2. Vercel AI Gateway — AI_GATEWAY_API_KEY (local) ou VERCEL_OIDC_TOKEN (Vercel).
 // Nunca usamos ANTHROPIC_API_KEY (regra de ouro #2). As chaves ficam só no
 // backend/.env, que é ignorado pelo git.
-const bedrockConfigured = Boolean(
-  process.env.AWS_BEARER_TOKEN_BEDROCK ||
-    (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY),
-)
-
-export const AI_PROVIDER: 'bedrock' | 'gateway' = bedrockConfigured
-  ? 'bedrock'
-  : 'gateway'
-
-// Modelo trocável por PS_AI_MODEL. No Bedrock o id é o perfil de inferência
-// regional (prefixo `us.`); no Gateway é `anthropic/claude-*`. O default do
-// Bedrock é Haiku: a tarefa é uma frase só, então o crédito rende bem mais.
-export const AI_MODEL =
-  process.env.PS_AI_MODEL ??
-  (bedrockConfigured
-    ? 'us.anthropic.claude-haiku-4-5-20251001-v1:0'
-    : 'anthropic/claude-sonnet-4.6')
-
 export function aiConfigured(): boolean {
   return Boolean(
-    bedrockConfigured ||
+    getAiSettings().configured ||
       process.env.AI_GATEWAY_API_KEY ||
       process.env.VERCEL_OIDC_TOKEN,
   )
 }
 
 function resolveModel(): LanguageModel {
-  return bedrockConfigured ? amazonBedrock(AI_MODEL) : gateway(AI_MODEL)
+  return gateway(process.env.PS_AI_MODEL ?? 'anthropic/claude-sonnet-4.6')
 }
 
 const pExecFile = promisify(execFile)
@@ -171,14 +153,28 @@ const SYSTEM = [
 
 export async function suggestNextAction(project: Project): Promise<string> {
   const ctx = await gatherContext(project)
-  const { text } = await generateText({
-    model: resolveModel(),
-    system: SYSTEM,
-    prompt: buildPrompt(project, ctx),
-    maxOutputTokens: 120,
-  })
+  const prompt = buildPrompt(project, ctx)
+  const text = getAiSettings().configured
+    ? (
+        await bedrockClient().chat.completions.create({
+          model: getAiSettings().model,
+          messages: [
+            { role: 'system', content: SYSTEM },
+            { role: 'user', content: prompt },
+          ],
+          max_tokens: 120,
+        })
+      ).choices[0]?.message.content ?? ''
+    : (
+        await generateText({
+          model: resolveModel(),
+          system: SYSTEM,
+          prompt,
+          maxOutputTokens: 120,
+        })
+      ).text
   const firstLine =
-    text
+    cleanAssistantText(text)
       .split('\n')
       .map((l) => l.trim())
       .find((l) => l.length > 0) ?? text.trim()

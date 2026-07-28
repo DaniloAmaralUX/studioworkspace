@@ -21,6 +21,7 @@ export const WS_BASE = BASE.replace(/^http/, 'ws')
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
+    credentials: 'same-origin',
     headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
   })
   if (!res.ok) {
@@ -81,8 +82,37 @@ export type GithubStatus = {
   error?: string
 }
 
+export type AiSettings = {
+  configured: boolean
+  provider: 'amazon-bedrock'
+  region: string
+  baseUrl: string
+  projectId: string | null
+  model: string
+  storage: 'backend/.env'
+}
+
+export type ChatMessage = {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export type StudioAuthStatus = {
+  configured: boolean
+  authenticated: boolean
+}
+
 export const api = {
   health: () => req<{ ok: boolean }>('/health'),
+  studioAuthStatus: () =>
+    req<StudioAuthStatus>('/auth/studio-status'),
+  studioLogin: (password: string) =>
+    req<{ ok: true }>('/auth/studio-login', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }),
+  studioLogout: () =>
+    req<{ ok: true }>('/auth/studio-logout', { method: 'POST' }),
   githubStatus: () => req<GithubStatus>('/github/status'),
   githubLogout: () => req<{ ok: true }>('/auth/logout', { method: 'POST' }),
   listProjects: () => req<Project[]>('/projects'),
@@ -131,6 +161,26 @@ export const api = {
   aiNextAction: (id: string) =>
     req<{ suggestion: string }>(`/projects/${id}/ai-next-action`, {
       method: 'POST',
+    }),
+  getAiSettings: () => req<AiSettings>('/settings/ai'),
+  saveAiSettings: (input: {
+    apiKey?: string
+    region: string
+    projectId?: string
+    model: string
+  }) =>
+    req<AiSettings>('/settings/ai', {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    }),
+  testAiSettings: () =>
+    req<{ ok: true; model: string }>('/settings/ai/test', {
+      method: 'POST',
+    }),
+  chat: (messages: ChatMessage[]) =>
+    req<{ message: ChatMessage; model: string }>('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ messages }),
     }),
   stampProject: (id: string) =>
     req<StampResult>(`/projects/${id}/stamp`, { method: 'POST' }),

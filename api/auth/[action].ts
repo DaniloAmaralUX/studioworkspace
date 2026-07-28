@@ -1,9 +1,14 @@
 // Rotas de auth num só handler (login | callback | logout) para caber no limite
 // de 12 Serverless Functions do plano Hobby. As URLs são as mesmas:
 //   /api/auth/login · /api/auth/callback · /api/auth/logout
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { methodNotAllowed, sendError } from '../_lib/http.js'
+import {
+  clearLoginFailures,
+  getLoginAttempts,
+  recordLoginFailure,
+} from '../_lib/kv.js'
 import {
   baseUrl,
   callbackUrl,
@@ -14,10 +19,106 @@ import {
   setSessionCookie,
   setStateCookie,
 } from '../_lib/auth.js'
+import {
+  clearStudioSessionCookie,
+  hasValidStudioSession,
+  studioAuthConfigured,
+  studioSessionCookie,
+  verifyStudioPassword,
+} from '../_lib/studioAuth.js'
 
 // OAuth Apps clássicos não têm escopo read-only de repo; `repo` cobre repos
 // privados (o app só faz leitura). Quem quiser menos privilégio segue no PAT.
 const SCOPE = 'read:user repo'
+const LOGIN_ATTEMPT_LIMIT = 5
+const LOGIN_ATTEMPT_TTL_SECONDS = 15 * 60
+
+function studioFingerprint(req: VercelRequest): string {
+  const forwarded = req.headers['x-forwarded-for']
+  const ip = Array.isArray(forwarded)
+    ? forwarded[0]
+    : forwarded?.split(',')[0]?.trim() ?? 'unknown'
+  return createHash('sha256').update(ip).digest('base64url').slice(0, 32)
+}
+
+function studioStatus(req: VercelRequest, res: VercelResponse): void {
+  if (req.method !== 'GET') return methodNotAllowed(res, 'GET')
+  res.setHeader('Cache-Control', 'no-store')
+  res.status(200).json({
+    configured: studioAuthConfigured(),
+    authenticated: hasValidStudioSession(req.headers.cookie),
+  })
+}
+
+async function studioLogin(
+  req: VercelRequest,
+  res: VercelResponse,
+): Promise<void> {
+  if (req.method !== 'POST') return methodNotAllowed(res, 'POST')
+  res.setHeader('Cache-Control', 'no-store')
+  if (!studioAuthConfigured()) {
+    return sendError(
+      res,
+      503,
+      'studio_auth_not_configured',
+      'O acesso do Studio ainda não foi configurado.',
+    )
+  }
+
+  const body = req.body as { password?: unknown } | null
+  const password =
+    typeof body?.password === 'string' ? body.password : ''
+  if (!password || password.length > 256) {
+    return sendError(
+      res,
+      400,
+      'invalid_body',
+      'Informe uma senha válida.',
+    )
+  }
+
+  const fingerprint = studioFingerprint(req)
+  try {
+    const attempts = await getLoginAttempts(fingerprint)
+    if (attempts >= LOGIN_ATTEMPT_LIMIT) {
+      res.setHeader('Retry-After', String(LOGIN_ATTEMPT_TTL_SECONDS))
+      return sendError(
+        res,
+        429,
+        'too_many_attempts',
+        'Muitas tentativas. Aguarde 15 minutos e tente novamente.',
+      )
+    }
+
+    if (!verifyStudioPassword(password)) {
+      await recordLoginFailure(fingerprint, LOGIN_ATTEMPT_TTL_SECONDS)
+      return sendError(
+        res,
+        401,
+        'invalid_credentials',
+        'Senha incorreta.',
+      )
+    }
+
+    await clearLoginFailures(fingerprint)
+    res.setHeader('Set-Cookie', studioSessionCookie())
+    res.status(200).json({ ok: true })
+  } catch {
+    sendError(
+      res,
+      503,
+      'studio_auth_unavailable',
+      'Não foi possível validar o acesso agora. Tente novamente.',
+    )
+  }
+}
+
+function studioLogout(req: VercelRequest, res: VercelResponse): void {
+  if (req.method !== 'POST') return methodNotAllowed(res, 'POST')
+  res.setHeader('Cache-Control', 'no-store')
+  res.setHeader('Set-Cookie', clearStudioSessionCookie())
+  res.status(200).json({ ok: true })
+}
 
 // GET /api/auth/login — inicia o web flow (state anti-CSRF + redirect ao GitHub).
 function login(req: VercelRequest, res: VercelResponse): void {
@@ -133,6 +234,12 @@ export default async function handler(
 ): Promise<void> {
   const action = req.query.action
   switch (action) {
+    case 'studio-status':
+      return studioStatus(req, res)
+    case 'studio-login':
+      return studioLogin(req, res)
+    case 'studio-logout':
+      return studioLogout(req, res)
     case 'login':
       return login(req, res)
     case 'callback':
