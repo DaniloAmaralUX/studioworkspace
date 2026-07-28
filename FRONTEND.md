@@ -114,6 +114,21 @@ Todas as mutations invalidam a query `['projects']` (React Query) para o hub ref
 - Nada de dashboard cheio de métrica decorativa. Densidade confortável por padrão.
 - Atalho de teclado para busca (`/` ou `Ctrl+K`) para "achar rápido".
 
+## Context Project
+
+- Chat desktop com o modelo configurado em **IA e APIs**; a interface identifica o modelo ativo.
+- Histórico efêmero na sessão, `Enter` envia e `Shift+Enter` quebra linha.
+- A fase inicial valida perguntas e respostas básicas. Contexto de GitHub entra numa fatia posterior.
+
+## Login do Studio Cloud
+
+- `/login` é uma tela cloud-only com senha única para o workspace pessoal.
+- Após autenticar, o servidor grava uma sessão segura de sete dias em cookie `HttpOnly`; o frontend
+  nunca recebe nem persiste o segredo de assinatura.
+- A sidebar oferece **Sair do Studio**, que expira a sessão e volta para `/login`.
+- O parâmetro `next` aceita somente caminhos internos iniciados por `/`, evitando redirecionamento
+  para domínios externos.
+
 ## Tema
 
 - shadcn com CSS variables; suportar claro/escuro (o app segue o tema do SO por padrão).

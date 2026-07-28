@@ -4,20 +4,17 @@
 // (VERCEL_OIDC_TOKEN) — nunca ANTHROPIC_API_KEY (regra de ouro).
 // Contexto do repo vem da API do GitHub (README + commits), não de git local.
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { generateText, gateway } from 'ai'
+import { z } from 'zod'
 import { getProject } from '../../_lib/kv.js'
 import { methodNotAllowed, sendError } from '../../_lib/http.js'
 import { repoCommits, repoReadme } from '../../_lib/github.js'
 import { resolveGithubToken } from '../../_lib/auth.js'
 import type { Project } from '../../_lib/types.js'
-
-const AI_MODEL = process.env.PS_AI_MODEL ?? 'anthropic/claude-sonnet-4.6'
-
-function aiConfigured(): boolean {
-  return Boolean(
-    process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN,
-  )
-}
+import {
+  aiConfigured,
+  generateAiChat,
+  generateAiText,
+} from '../../_lib/ai.js'
 
 const STATUS_PT: Record<Project['status'], string> = {
   planning: 'planejando',
@@ -33,6 +30,83 @@ const SYSTEM = [
   'Regras: uma só frase imperativa curta, em português do Brasil. Sem listas, sem numeração, sem preâmbulo, sem aspas.',
   'Prefira o menor passo que destrava o projeto agora.',
 ].join(' ')
+
+const APP_TIME_ZONE = 'America/Fortaleza'
+
+function buildChatSystem(now = new Date()): string {
+  const currentDateTime = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: APP_TIME_ZONE,
+    dateStyle: 'full',
+    timeStyle: 'short',
+  }).format(now)
+
+  return [
+    'Você é o Context Project, copiloto de projetos do Studio.',
+    'Responda em português do Brasil, com clareza e concisão.',
+    `A data e hora atuais, fornecidas pelo sistema, são ${currentDateTime} (${APP_TIME_ZONE}). Considere essa informação autoritativa e nunca a substitua por uma data inferida do seu treinamento.`,
+    'Nesta primeira versão você conversa e esclarece dúvidas gerais.',
+    'Você ainda não recebeu dados do GitHub ou do projeto selecionado.',
+    'Se perguntarem pelo estado atual de um projeto, diga que a leitura do repositório será conectada na próxima versão e não invente informações.',
+    'Para notícias, resultados e outros fatos recentes que não estejam presentes na conversa, diga que não possui uma fonte atualizada em vez de inventar ou afirmar que ainda não aconteceram.',
+    'Mostre somente a resposta final; nunca exponha raciocínio interno.',
+  ].join(' ')
+}
+
+const chatBody = z.object({
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string().trim().min(1).max(4_000),
+      }),
+    )
+    .min(1)
+    .max(24),
+})
+
+async function handleChat(
+  req: VercelRequest,
+  res: VercelResponse,
+): Promise<void> {
+  if (!aiConfigured()) {
+    return sendError(
+      res,
+      503,
+      'ai_not_configured',
+      'IA não configurada no projeto Vercel.',
+    )
+  }
+  const parsed = chatBody.safeParse(req.body)
+  if (!parsed.success) {
+    return sendError(
+      res,
+      400,
+      'invalid_body',
+      'Envie de 1 a 24 mensagens válidas.',
+    )
+  }
+  try {
+    const result = await generateAiChat({
+      system: buildChatSystem(),
+      messages: parsed.data.messages,
+      maxTokens: 800,
+    })
+    if (!result.text) {
+      return sendError(res, 502, 'chat_empty', 'A IA respondeu sem conteúdo.')
+    }
+    res.status(200).json({
+      message: { role: 'assistant', content: result.text },
+      model: result.model,
+    })
+  } catch {
+    sendError(
+      res,
+      502,
+      'chat_failed',
+      'Não foi possível responder agora. Tente novamente.',
+    )
+  }
+}
 
 function buildPrompt(
   project: Project,
@@ -72,6 +146,9 @@ export default async function handler(
   if (typeof id !== 'string' || !id) {
     return sendError(res, 400, 'invalid_id', 'Id do projeto ausente.')
   }
+  if (id === 'context-project') {
+    return handleChat(req, res)
+  }
   try {
     const project = await getProject(id)
     if (!project) {
@@ -97,11 +174,10 @@ export default async function handler(
       ])
     }
 
-    const { text } = await generateText({
-      model: gateway(AI_MODEL),
+    const { text } = await generateAiText({
       system: SYSTEM,
       prompt: buildPrompt(project, commits, readme),
-      maxOutputTokens: 120,
+      maxTokens: 120,
     })
     const suggestion =
       text

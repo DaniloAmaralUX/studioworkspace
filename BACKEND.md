@@ -131,6 +131,33 @@ Todas as respostas são JSON. Erros retornam `{ error: { code, message } }` com 
   - Modelo trocável por `PS_AI_MODEL`. Chamada só acontece por clique explícito do usuário —
     não há chamada de IA automática ou em background.
 
+### Configuração local de IA
+- `GET /api/settings/ai` → status e metadados não secretos do Amazon Bedrock.
+- `PUT /api/settings/ai` — salva chave, região, Project ID e modelo somente em `backend/.env`.
+  A chave nunca é devolvida pela API, escrita no índice de projetos ou enviada à cloud.
+- `POST /api/settings/ai/test` — faz uma inferência mínima e explícita para validar chave, região,
+  projeto e acesso ao modelo.
+- Endpoint padrão: `https://bedrock-mantle.us-east-2.api.aws/v1`; modelo padrão:
+  `moonshotai.kimi-k2.5`.
+
+### Context Project (chat)
+- `POST /api/chat` — body `{ messages: { role: 'user'|'assistant', content: string }[] }`.
+- Mantém no máximo 24 mensagens por chamada e não persiste conversas.
+- A primeira fatia é chat básico via Kimi K2.5. Ainda não lê GitHub ou filesystem; o prompt de
+  sistema proíbe inventar estado de projeto até a fatia de contexto.
+- Blocos de raciocínio retornados por modelos reasoning são removidos no backend antes da resposta.
+
+### Login do Studio Cloud
+- `middleware.ts` protege páginas e APIs na Vercel. Sem sessão, páginas redirecionam para `/login` e
+  APIs respondem `401 studio_auth_required`.
+- `GET /api/auth/studio-status` informa apenas se o login está configurado e se a sessão é válida.
+- `POST /api/auth/studio-login` valida `{ password }`, cria cookie
+  `__Host-studio_session` (`HttpOnly`, `Secure`, `SameSite=Strict`) e limita falhas a cinco tentativas
+  por quinze minutos via KV.
+- `POST /api/auth/studio-logout` expira o cookie imediatamente.
+- A Vercel recebe somente `STUDIO_ACCESS_PASSWORD_HASH` (PBKDF2-SHA256) e
+  `STUDIO_SESSION_SECRET`; a senha em texto puro nunca entra no repositório, KV ou logs.
+
 ## Detecção de stack (`stackDetect.ts`)
 
 Ler apenas o topo da pasta (sem varredura profunda) e mapear arquivos-chave → tags:

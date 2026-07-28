@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { AppLayout } from '@/app/AppLayout'
 import { ProjectsScreen } from '@/routes/ProjectsScreen'
 import { ProjectDetail } from '@/routes/ProjectDetail'
+import { LoginScreen } from '@/routes/LoginScreen'
 import { IS_CLOUD } from '@/lib/api'
 
 // Modo Maestri: desktop-only e pesado (React Flow) — carregado sob demanda e
@@ -27,6 +28,14 @@ const FoundationScreen = lazy(() =>
 const HowToScreen = lazy(() =>
   import('@/routes/HowToScreen').then((m) => ({ default: m.HowToScreen })),
 )
+const SettingsScreen = lazy(() =>
+  import('@/routes/SettingsScreen').then((m) => ({
+    default: m.SettingsScreen,
+  })),
+)
+const ChatScreen = lazy(() =>
+  import('@/routes/ChatScreen').then((m) => ({ default: m.ChatScreen })),
+)
 
 function ScreenFallback() {
   return (
@@ -45,6 +54,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <Routes>
+          {IS_CLOUD && <Route path="login" element={<LoginScreen />} />}
           <Route element={<AppLayout />}>
             <Route index element={<ProjectsScreen />} />
             <Route
@@ -71,6 +81,24 @@ export default function App() {
                 </Suspense>
               }
             />
+            <Route
+              path="context-project"
+              element={
+                <Suspense fallback={<ScreenFallback />}>
+                  <ChatScreen />
+                </Suspense>
+              }
+            />
+            {!IS_CLOUD && (
+              <Route
+                path="settings"
+                element={
+                  <Suspense fallback={<ScreenFallback />}>
+                    <SettingsScreen />
+                  </Suspense>
+                }
+              />
+            )}
             <Route path="projects/:id" element={<ProjectDetail />} />
             <Route
               path="projects/:id/foundation"

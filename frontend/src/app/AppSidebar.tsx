@@ -4,9 +4,12 @@ import {
   Palette,
   LayoutTemplate,
   BookOpen,
+  KeyRound,
+  MessagesSquare,
 } from 'lucide-react'
 import { StudioLogo } from '@/components/StudioLogo'
 import { GithubConnect } from '@/components/GithubConnect'
+import { StudioAccess } from '@/components/StudioAccess'
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +23,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import { IS_CLOUD } from '@/lib/api'
 
 const nav = [
   { title: 'Projetos', url: '/', icon: FolderKanban, end: true },
@@ -74,6 +78,32 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 )
               })}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith('/context-project')}
+                  tooltip="Context Project"
+                >
+                  <NavLink to="/context-project">
+                    <MessagesSquare />
+                    <span>Context Project</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              {!IS_CLOUD && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith('/settings')}
+                    tooltip="IA e APIs"
+                  >
+                    <NavLink to="/settings">
+                      <KeyRound />
+                      <span>IA e APIs</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -81,6 +111,7 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <GithubConnect />
+        {IS_CLOUD && <StudioAccess />}
       </SidebarFooter>
 
       <SidebarRail />

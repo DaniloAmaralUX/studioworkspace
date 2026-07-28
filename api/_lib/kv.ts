@@ -6,6 +6,7 @@ import type { Foundation, Project, ProjectSource, Template } from './types.js'
 const PROJECTS_KEY = 'ps:projects'
 const TEMPLATES_KEY = 'ps:templates'
 const FOUNDATIONS_KEY = 'ps:foundations'
+const LOGIN_ATTEMPT_PREFIX = 'ps:auth:attempts:'
 
 let client: Redis | null = null
 
@@ -87,4 +88,24 @@ export async function putTemplate(template: Template): Promise<void> {
 
 export async function deleteTemplate(id: string): Promise<boolean> {
   return (await kv().hdel(TEMPLATES_KEY, id)) > 0
+}
+
+export async function getLoginAttempts(fingerprint: string): Promise<number> {
+  return (await kv().get<number>(`${LOGIN_ATTEMPT_PREFIX}${fingerprint}`)) ?? 0
+}
+
+export async function recordLoginFailure(
+  fingerprint: string,
+  ttlSeconds: number,
+): Promise<number> {
+  const key = `${LOGIN_ATTEMPT_PREFIX}${fingerprint}`
+  const attempts = await kv().incr(key)
+  if (attempts === 1) await kv().expire(key, ttlSeconds)
+  return attempts
+}
+
+export async function clearLoginFailures(
+  fingerprint: string,
+): Promise<void> {
+  await kv().del(`${LOGIN_ATTEMPT_PREFIX}${fingerprint}`)
 }

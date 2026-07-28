@@ -1,0 +1,18 @@
+# O deploy cloud usa apenas api/, frontend/ e dependências da raiz.
+# Evita enviar o app Electron e artefatos locais acima do limite da Vercel.
+backend/
+desktop/
+work/
+
+node_modules/
+**/node_modules/
+frontend/dist/
+
+.git/
+.vercel/
+.claude/
+.agents/
+
+projects.json
+templates.json
+*.log
