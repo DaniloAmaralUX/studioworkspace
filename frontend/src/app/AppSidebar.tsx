@@ -7,6 +7,7 @@ import {
   KeyRound,
   MessagesSquare,
   Blocks,
+  Component,
 } from 'lucide-react'
 import { StudioLogo } from '@/components/StudioLogo'
 import { GithubConnect } from '@/components/GithubConnect'
@@ -31,6 +32,12 @@ const nav = [
   { title: 'Temas', url: '/themes', icon: Palette, end: false },
   { title: 'Templates', url: '/templates', icon: LayoutTemplate, end: false },
   { title: 'Skills', url: '/skills', icon: Blocks, end: false },
+  {
+    title: 'Design System',
+    url: '/design-system',
+    icon: Component,
+    end: false,
+  },
   { title: 'Como usar', url: '/como-usar', icon: BookOpen, end: false },
 ]
 
