@@ -58,6 +58,10 @@ na primeira versão.
 5. **Uma decisão por vez.** Poucas escolhas, defaults recomendados, linguagem clara (foco anti-TDAH).
 6. **Reaproveitar padrão, não forkar produto.** OpenWork / Open CoDesign / shadcn são referência.
 7. **Clareza antes de automação.** Mostrar o que vai acontecer (abrir, clonar) e confirmar o destrutivo.
+8. **Usar a ferramenta certa.** Trabalho visual livre, diagramas e exploração espacial vivem no Paper.
+   O Studio organiza contexto, decisões e saúde do projeto; não replica canvas infinito nem Figma.
+9. **IA operacional pelo Bedrock.** Memórias, ADRs, resumos, auditorias e sugestões produzidos dentro do
+   Studio usam o Kimi via Amazon Bedrock no servidor. O produto não depende desta conversa para operar.
 
 ## 6. Ambiente verificado (nesta máquina)
 
@@ -144,8 +148,11 @@ Persistência: índice global `projects.json`; dentro de cada projeto **local**,
 ## 10. Fora do escopo (MVP)
 
 Agente embutido/streaming, agentes em paralelo, colaboração/multiusuário, sync em nuvem, billing,
-marketplace, canvas estilo Figma, empacotamento desktop, importar automaticamente **todos** os repos
-(o usuário escolhe quais entram), dezenas de templates.
+marketplace, canvas infinito, editor visual de telas, integração Figma, empacotamento desktop, importar
+automaticamente **todos** os repos (o usuário escolhe quais entram), dezenas de templates.
+
+> **Decisão de produto (2026-07-28):** o Paper é a ferramenta externa escolhida para canvas,
+> fluxos e exploração visual. O Studio não terá rota, botão ou backlog de canvas próprio.
 
 > **Emenda (atualizada em 2026-07-28, [`PLANO2.md`](./PLANO2.md)):** para a variante **Studio Cloud**,
 > persistência em KV, IA e o Context Project fundamentado em GitHub foram autorizados como uma linha

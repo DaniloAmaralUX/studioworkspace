@@ -53,7 +53,7 @@ export async function buildApp({
 
   // Só a origem do frontend local pode falar com a API.
   await app.register(cors, { origin: FRONTEND_ORIGIN })
-  // WebSocket (Modo Maestri) — registrar antes das rotas que usam { websocket: true }.
+  // WebSocket — só as rotas de canvas usam; registrar antes delas.
   await app.register(websocket)
 
   await app.register(healthRoutes)
@@ -64,6 +64,8 @@ export async function buildApp({
   await app.register(aiRoutes)
   await app.register(stampRoutes)
   await app.register(scaffoldRoutes)
+  // Histórico: o canvas foi encerrado como produto (ADR-001) e não tem mais rota na interface.
+  // As rotas seguem registradas para não quebrar dados já gravados em `.workspace/canvas/`.
   await app.register(canvasRoutes)
   await app.register(settingsRoutes)
   await app.register(chatRoutes)

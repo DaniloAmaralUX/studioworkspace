@@ -152,12 +152,23 @@ Todas as respostas são JSON. Erros retornam `{ error: { code, message } }` com 
 ### Context Project (chat)
 - `POST /api/chat` — body `{ projectId?, messages: { role: 'user'|'assistant', content: string }[] }`.
 - Sem `projectId`, mantém o chat geral e não consulta o GitHub.
-- Com `projectId`, valida um projeto GitHub e monta um snapshot efêmero com metadados, README limitado
-  a 2.000 caracteres e até 12 commits; nenhum conteúdo do repo é salvo em KV.
+- Com `projectId`, valida um projeto GitHub e monta um snapshot efêmero com seis consultas paralelas:
+  metadados, README limitado a 2.000 caracteres, até 12 commits e — desde o R2 — até 10 issues abertas,
+  10 pull requests abertos e 10 execuções recentes de CI. Nenhum conteúdo do repo é salvo em KV.
 - Responde `{ message, model, context, suggestedNextAction }`; `context` inclui horário, estado
-  completo/parcial, avisos e fontes construídas pelo servidor.
-- Mantém no máximo 24 mensagens e um orçamento total de caracteres por chamada. README e commits são
-  tratados como dados não confiáveis, nunca como instruções.
+  completo/parcial, avisos e fontes construídas pelo servidor. Fontes de CI carregam `state`
+  (`success` | `failure` | `pending`).
+- Metadados do repositório são bloqueantes; as demais fontes degradam para aviso + contexto parcial.
+  Um 403/404 em issues, PRs ou CI indica escopo faltando no PAT e vira aviso acionável, não erro.
+- Mantém no máximo 24 mensagens e um orçamento total de caracteres por chamada. README, commits e
+  títulos de issue/PR são tratados como dados não confiáveis, nunca como instruções; o corpo de
+  issues e PRs nunca entra no prompt.
+
+### Canvas (histórico, desktop-only)
+- O canvas foi encerrado como produto em 2026-07-28 (`docs/decisions/ADR-001-paper-for-visual-canvas.md`)
+  e não tem mais rota na interface.
+- `backend/src/routes/canvas.ts` continua registrado para não quebrar dados já gravados em
+  `.workspace/canvas/`. São rotas sem consumidor: não construir nada sobre elas.
 
 ### Login do Studio Cloud
 - Este é o único gate de autenticação do workspace. As antigas rotas OAuth GitHub foram removidas.

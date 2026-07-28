@@ -20,10 +20,18 @@ quando validado pelo uso real dele.
 - Qualidade do core: startup rápido, launchers 100% confiáveis, persistência atômica, zero
   fricção entre abrir o app e estar trabalhando num projeto.
 
-**Congelado até o core estar validado (não construir, não polir):** Modo Maestri / canvas de
-agentes (branch `canvas`), aba Design System, novos temas, instalador NSIS, qualquer expansão
-do Studio Cloud. Se o usuário pedir algo dessa lista, lembre-o do congelamento e pergunte se
-quer descongelar conscientemente.
+**Encerrado (não retomar sem novo ADR):** Modo Maestri / canvas de agentes — decisão de produto de
+2026-07-28, `docs/decisions/ADR-001-paper-for-visual-canvas.md`. O Paper cobre canvas, fluxos e
+exploração visual; canvas infinito, editor visual e Figma estão fora do escopo. O código segue no
+repositório como histórico, sem rota.
+
+**Congelado até o core estar validado (não construir, não polir):** aba Design System, novos temas,
+instalador NSIS, qualquer expansão do Studio Cloud além de R3/R4. Se o usuário pedir algo dessa
+lista, lembre-o do congelamento e pergunte se quer descongelar conscientemente.
+
+**Próximas entregas do produto:** R3 (memória por projeto, documentos de contexto e ADRs) e R4
+(auditoria de acessibilidade, testes e qualidade). A IA dessas funções roda em Kimi via Amazon
+Bedrock (`docs/decisions/ADR-002-bedrock-for-product-ai.md`).
 
 **Critério de validação:** o usuário abriu o Studio e o usou de verdade por ~2 semanas. Cada
 sessão de trabalho começa perguntando: *"o que te travou ou te fez não usar ontem?"* — a
