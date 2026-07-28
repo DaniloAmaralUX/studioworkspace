@@ -7,6 +7,8 @@ work/
 node_modules/
 **/node_modules/
 frontend/dist/
+test/
+vitest.cloud.config.ts
 
 .git/
 .vercel/

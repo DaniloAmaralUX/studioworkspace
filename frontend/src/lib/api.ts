@@ -1,10 +1,11 @@
 import type {
   CanvasDoc,
+  ChatRequest,
+  ChatResponse,
   Foundation,
   Launchers,
   LauncherKind,
   Project,
-  ProjectStatus,
 } from './types'
 
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:5178/api'
@@ -77,8 +78,7 @@ export type FoundationResponse = {
 export type GithubStatus = {
   authed: boolean
   login?: string
-  via?: 'oauth' | 'pat' | null
-  oauthAvailable?: boolean
+  via?: 'pat' | null
   error?: string
 }
 
@@ -90,11 +90,6 @@ export type AiSettings = {
   projectId: string | null
   model: string
   storage: 'backend/.env'
-}
-
-export type ChatMessage = {
-  role: 'user' | 'assistant'
-  content: string
 }
 
 export type StudioAuthStatus = {
@@ -114,7 +109,6 @@ export const api = {
   studioLogout: () =>
     req<{ ok: true }>('/auth/studio-logout', { method: 'POST' }),
   githubStatus: () => req<GithubStatus>('/github/status'),
-  githubLogout: () => req<{ ok: true }>('/auth/logout', { method: 'POST' }),
   listProjects: () => req<Project[]>('/projects'),
   patchProject: (id: string, patch: ProjectPatch) =>
     req<Project>(`/projects/${id}`, {
@@ -177,10 +171,11 @@ export const api = {
     req<{ ok: true; model: string }>('/settings/ai/test', {
       method: 'POST',
     }),
-  chat: (messages: ChatMessage[]) =>
-    req<{ message: ChatMessage; model: string }>('/chat', {
+  chat: (input: ChatRequest, signal?: AbortSignal) =>
+    req<ChatResponse>('/chat', {
       method: 'POST',
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify(input),
+      signal,
     }),
   stampProject: (id: string) =>
     req<StampResult>(`/projects/${id}/stamp`, { method: 'POST' }),
@@ -226,4 +221,11 @@ export type StampResult = {
   files: { file: string; action: StampAction }[]
 }
 
-export type { ProjectStatus }
+export type {
+  ChatContext,
+  ChatMessage,
+  ChatRequest,
+  ChatResponse,
+  ContextSource,
+  ProjectStatus,
+} from './types'

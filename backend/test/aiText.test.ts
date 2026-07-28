@@ -19,4 +19,15 @@ describe('cleanAssistantText', () => {
       cleanAssistantText('<think>raciocínio privado</think>\nResposta.'),
     ).toBe('Resposta.')
   })
+
+  it('remove raciocínio truncado sem tag de fechamento', () => {
+    expect(
+      cleanAssistantText('<think>raciocínio privado ainda incompleto'),
+    ).toBe('')
+    expect(
+      cleanAssistantText(
+        'Texto seguro.<think>raciocínio privado ainda incompleto',
+      ),
+    ).toBe('Texto seguro.')
+  })
 })

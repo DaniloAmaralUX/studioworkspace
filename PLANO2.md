@@ -9,17 +9,19 @@
 | # | Decisão | Escolha | Por quê |
 |---|---------|---------|---------|
 | 1 | Direção | **Híbrido** | O app local continua dono de launchers, scaffold e carimbo (impossíveis em serverless). O Studio Cloud vira o cockpit GitHub + IA sempre disponível. Nada do desktop é removido. |
-| 2 | Credencial GitHub | **PAT fine-grained read-only (MVP)** → OAuth App depois | Menor atrito para single-user; revogável; escopo mínimo. Seguro porque o app fica atrás de Vercel Authentication. |
+| 2 | Credencial GitHub | **PAT fine-grained read-only, somente no servidor** | Menor atrito para single-user; revogável; escopo mínimo. OAuth e token em cookie não fazem parte da arquitetura. |
 | 3 | Primeira feature de IA | **Próxima ação sugerida por repo** | Torna o conceito central do produto (próxima ação sempre visível) inteligente. POC já existe (`core/ai.ts`). |
-| 4 | Privacidade | **Vercel Authentication (SSO do time)** | Grátis, resolve single-user sem código. Password Protection exigiria plano pago. |
+| 4 | Privacidade | **Login próprio do Studio** | Gate single-user canônico, com hash PBKDF2, sessão assinada e rate limit; independe da sessão da conta Vercel. |
 | + | Host do Meu Registry | **Mesmo projeto Vercel** (`/r/*.json`) | Resolve a decisão pendente de [[themes-tweakcn-library]] sem novo host. |
 
 ## Emenda de charter (aplicar na Fatia 0)
 
 O deploy contradiz 3 regras de ouro do `CLAUDE.md`/`PRD.md`. A emenda é **escopo por variante**, não revogação:
 
-- **Regra 1 (local-only):** vale para a variante desktop. A variante cloud serve na Vercel **atrás de Vercel Authentication** — nunca pública sem gate.
-- **Regra 2 (nunca guardar tokens):** vale para o desktop (`gh` CLI). Na cloud, credencial = env var na Vercel (PAT read-only) — nunca em código, log ou KV… exceto `ps:gh:token` **não**: PAT fica só em env var, fora do KV.
+- **Regra 1 (local-only):** vale para a variante desktop. A variante cloud serve na Vercel atrás do
+  **login próprio do Studio** — nunca pública sem gate.
+- **Regra 2 (nunca guardar tokens):** vale para o desktop (`gh` CLI). Na cloud, a única credencial
+  GitHub é `GITHUB_TOKEN` read-only no ambiente da Vercel — nunca em cookie, código, log, chat ou KV.
 - **PRD §10 (IA fora de escopo):** IA via **AI Gateway** entra como diferencial da variante cloud. `ANTHROPIC_API_KEY` continua proibida.
 
 ## Preflight (verificado em 2026-07-24)
@@ -29,7 +31,9 @@ O deploy contradiz 3 regras de ouro do `CLAUDE.md`/`PRD.md`. A emenda é **escop
 - ✅ Frontend já parametrizado: `frontend/src/lib/api.ts` usa `VITE_API_BASE` (prod = `/api`).
 - ✅ `backend/src/core/ai.ts` já usa AI Gateway e aceita `VERCEL_OIDC_TOKEN` (zero chave na Vercel).
 - ✅ Build de produção do frontend passa (verificado na entrega do hub Linear).
-- ⏳ **Ação do usuário (bloqueia Fatia 2):** criar PAT fine-grained em github.com/settings/personal-access-tokens — repos: todos (ou selecionados), permissões read-only: *Metadata, Contents, Issues, Pull requests* — e cadastrar como `GITHUB_TOKEN` no projeto Vercel. **Nunca colar o token no chat/código.**
+- ✅ PAT fine-grained read-only cadastrado como `GITHUB_TOKEN` no projeto Vercel. Permissões mínimas:
+  *Metadata* e *Contents*; ampliar para *Issues* e *Pull requests* somente quando R2 for descongelado.
+  **Nunca copiar o valor para chat, código, cookie, KV ou log.**
 
 ## Arquitetura-alvo
 
@@ -41,7 +45,9 @@ O deploy contradiz 3 regras de ouro do `CLAUDE.md`/`PRD.md`. A emenda é **escop
 - `api/_lib/` = types/zod/lógica pura portada do backend (fonte: `backend/src/lib/types.ts`, `core/foundation.ts`). Fastify **não** migra.
 - **Persistência: Upstash Redis** (Marketplace). Hashes: `ps:projects` (id→Project), `ps:templates`, `ps:foundation:<id>`.
 - `vercel.json`: rewrite `/((?!api/).*)` → `/index.html`; `functions.maxDuration: 60`.
-- Env: `VITE_API_BASE=/api` · `GITHUB_TOKEN` (PAT) · `KV_REST_API_*` (auto) · `PS_AI_MODEL` (opcional) · AI Gateway via OIDC (nada a configurar).
+- Env: `VITE_API_BASE=/api` · `GITHUB_TOKEN` (PAT read-only) · `KV_REST_API_*` (auto) ·
+  `STUDIO_ACCESS_PASSWORD_HASH` · `STUDIO_SESSION_SECRET` · `PS_AI_MODEL` (opcional) · AI Gateway via
+  OIDC (nada a configurar).
 
 ### Fica no desktop (não portar)
 `routes/open.ts` (launchers), `core/scaffold.ts`, `core/stamp.ts`, `dirtyCount`/working-tree local.
@@ -49,19 +55,14 @@ Na cloud, "trabalhar" = links: `github.com` · `github.dev` · `vscode.dev` · *
 
 ## Fatias (MVP ≈ 3,5 dias)
 
-### Fatia 0 — Shell no ar (~0,5d) — ✅ FEITA em 2026-07-24
-Produção: `https://studio-cloud-blush.vercel.app` (projeto `studio-cloud`, deploy via push na `main`).
-**Pendência única:** o CLI só alcança "Standard Protection" — previews e URLs de deployment pedem
-login, mas o **alias de produção está público**. Antes da Fatia 1, mudar no dashboard:
-*studio-cloud → Settings → Deployment Protection → Vercel Authentication → **All Deployments***.
-(Hoje não há dado/segredo exposto — só o SPA estático e `/api/health`, ambos já públicos no repo.)
-1. Emenda de charter em `CLAUDE.md` + `PRD.md` (texto acima).
-2. `frontend/vercel.json` (rewrite SPA + maxDuration).
-3. `frontend/api/health.ts` — primeira função (`{ ok: true, variant: 'cloud' }`).
-4. Criar projeto Vercel `studio-cloud` conectado ao repo (root `frontend/`).
-5. Ativar **Vercel Authentication** (Deployment Protection) antes do primeiro deploy público.
-6. `VITE_API_BASE=/api` (Production/Preview).
-- **Aceite:** URL de produção pede login Vercel; SPA renderiza (Temas funciona, é client-side); `/api/health` responde.
+### Fatia 0 — Shell e autenticação — ✅ FEITA; hardening R0 em 2026-07-28
+Produção atual: `https://studioworkspace-mauve.vercel.app` (deploy via Git).
+1. `middleware.ts` protege páginas e APIs com a sessão própria do Studio.
+2. `/login` usa senha única; a Vercel recebe somente hash PBKDF2 e segredo de assinatura.
+3. Respostas `/api/*` são `no-store`; falhas públicas não incluem detalhes internos.
+4. GitHub usa somente o PAT read-only do ambiente e a interface não oferece OAuth.
+- **Aceite:** sem sessão, páginas redirecionam para `/login` e APIs retornam `401`; nenhum token chega
+  ao browser, KV, chat ou log.
 
 ### Fatia 1 — KV + CRUD (~1d)
 1. Instalar Upstash Redis via Marketplace no projeto.
@@ -85,9 +86,11 @@ login, mas o **alias de produção está público**. Antes da Fatia 1, mudar no 
 - **Fatia 4** Foundation na cloud (KV + copy/download `DESIGN.md`) + IA foundation (`generateObject` com `foundationSchema`).
 - **Fatia R** Meu Registry: `shadcn build` no CI → servir `registry.json`/itens em `/r/` (desbloqueia `shadcn apply @studio/<tema>` de qualquer lugar).
 - **Fatia 5** deep links Codespaces/github.dev/vscode.dev no `OpenWithButtons` (variante cloud).
-- **Fatia 6** OAuth App no lugar do PAT · "abrir PR" da foundation · busca NL (só se filtro client-side não bastar).
+- **Fatia 6** "abrir PR" da foundation · busca NL (só se filtro client-side não bastar).
 
 ## Riscos/limites aceitos
 - Working tree local invisível na cloud (híbrido cobre).
 - `claude://` não existe na cloud (precisa de path local absoluto) — Codespaces é o substituto.
-- Repo público + SPA protegida: o **código** já é público; o que o gate protege são seus **dados** (projetos, próximas ações) e o uso de IA/PAT.
+- Repo público + SPA protegida: o **código** já é público; o login próprio protege os dados pessoais
+  (projetos, próximas ações) e o uso de IA/PAT. Deployment Protection pode permanecer como defesa
+  adicional em previews, mas não substitui o gate do Studio.

@@ -5,6 +5,9 @@ export function cleanAssistantText(input: string): string {
   const finalThinkTag = text.toLowerCase().lastIndexOf('</think>')
   if (finalThinkTag >= 0) {
     text = text.slice(finalThinkTag + '</think>'.length)
+  } else {
+    const openThinkTag = text.toLowerCase().indexOf('<think>')
+    if (openThinkTag >= 0) text = text.slice(0, openThinkTag)
   }
   text = text.replace(/<think>[\s\S]*?<\/think>/gi, '')
   return text.trim()
