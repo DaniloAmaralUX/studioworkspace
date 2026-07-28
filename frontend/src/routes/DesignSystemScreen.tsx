@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { CopyButton } from '@/components/CopyButton'
+import { ComponentPreview } from '@/components/design-system/ComponentPreview'
 import {
   catalog,
   categories,
   installCommand,
   type CatalogEntry,
 } from '@/registry/catalog'
+import { hasDemo } from '@/registry/demo-index'
 import { useDocumentTitle } from '@/lib/useDocumentTitle'
 
 function CommandBar({
@@ -34,7 +36,8 @@ function ComponentCard({
   onCopied,
 }: {
   entry: CatalogEntry
-  onCopied: (title: string) => void
+  /** Recebe a frase pronta para a região aria-live. */
+  onCopied: (message: string) => void
 }) {
   return (
     <article className="flex min-w-0 flex-col gap-4 rounded-xl border bg-card p-4">
@@ -56,11 +59,20 @@ function ComponentCard({
           {entry.description}
         </p>
       </div>
+
+      {hasDemo(entry.name) && (
+        <ComponentPreview
+          name={entry.name}
+          title={entry.title}
+          onCopied={() => onCopied(`Código de ${entry.title} copiado.`)}
+        />
+      )}
+
       <div className="mt-auto">
         <CommandBar
           command={installCommand(entry.name)}
           label={`Copiar comando de ${entry.title}`}
-          onCopied={() => onCopied(entry.title)}
+          onCopied={() => onCopied(`Comando de ${entry.title} copiado.`)}
         />
       </div>
     </article>
@@ -71,8 +83,8 @@ export function DesignSystemScreen() {
   useDocumentTitle('Design System')
   const [announcement, setAnnouncement] = useState('')
 
-  function handleCopied(title: string) {
-    setAnnouncement(`Comando de ${title} copiado.`)
+  function handleCopied(message: string) {
+    setAnnouncement(message)
   }
 
   const byCategory = categories
