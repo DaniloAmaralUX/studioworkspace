@@ -18,6 +18,9 @@ const ThemesScreen = lazy(() =>
 const TemplatesScreen = lazy(() =>
   import('@/routes/TemplatesScreen').then((m) => ({ default: m.TemplatesScreen })),
 )
+const SkillsScreen = lazy(() =>
+  import('@/routes/SkillsScreen').then((m) => ({ default: m.SkillsScreen })),
+)
 const FoundationScreen = lazy(() =>
   import('@/routes/FoundationScreen').then((m) => ({ default: m.FoundationScreen })),
 )
@@ -66,6 +69,14 @@ export default function App() {
               element={
                 <Suspense fallback={<ScreenFallback />}>
                   <TemplatesScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="skills"
+              element={
+                <Suspense fallback={<ScreenFallback />}>
+                  <SkillsScreen />
                 </Suspense>
               }
             />
