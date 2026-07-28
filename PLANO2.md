@@ -32,7 +32,9 @@ O deploy contradiz 3 regras de ouro do `CLAUDE.md`/`PRD.md`. A emenda é **escop
 - ✅ `backend/src/core/ai.ts` já usa AI Gateway e aceita `VERCEL_OIDC_TOKEN` (zero chave na Vercel).
 - ✅ Build de produção do frontend passa (verificado na entrega do hub Linear).
 - ✅ PAT fine-grained read-only cadastrado como `GITHUB_TOKEN` no projeto Vercel. Permissões mínimas:
-  *Metadata* e *Contents*; ampliar para *Issues* e *Pull requests* somente quando R2 for descongelado.
+  *Metadata* e *Contents*. Com o R2 entregue (2026-07-28), ampliar para *Issues: Read*,
+  *Pull requests: Read* e *Actions: Read* — sem elas o chat responde com contexto **parcial** e um
+  aviso pedindo para verificar as permissões, em vez de falhar.
   **Nunca copiar o valor para chat, código, cookie, KV ou log.**
 
 ## Arquitetura-alvo
