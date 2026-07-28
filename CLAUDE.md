@@ -10,17 +10,18 @@ Um **hub visual local** dos meus projetos (pastas locais **e** repositórios do 
 organizar e entrar neles rápido, com uma **"próxima ação" sempre visível** e um **configurador de
 foundation estilo `shadcn/create`**. Uso pessoal, single-user. Existe em **duas variantes** (ver
 [`PLANO2.md`](./PLANO2.md)): a **desktop** (Windows, tudo local — launchers, scaffold, carimbo) e a
-**Studio Cloud** (Vercel, cockpit GitHub + IA, atrás de Vercel Authentication).
+**Studio Cloud** (Vercel, cockpit GitHub + IA, protegida pelo login próprio do Studio).
 
 ## Regras de ouro (não violar)
 
 1. **Local-only (variante desktop):** servir **apenas em `127.0.0.1`**. Nunca expor em `0.0.0.0` nem
-   porta pública. *Emenda (2026-07-24, PLANO2.md):* a variante **Studio Cloud** roda na Vercel, sempre
-   **atrás de Vercel Authentication** — nunca pública sem gate.
+   porta pública. *Emenda (2026-07-28, PLANO2.md):* a variante **Studio Cloud** roda na Vercel, sempre
+   protegida pelo **login próprio do Studio** — nunca pública sem gate.
 2. **Nunca guardar tokens.** Na desktop, GitHub é via **`gh` CLI já autenticado** (`execFile('gh', …)`).
    Não ler, copiar, logar ou persistir credenciais. *Emenda (PLANO2.md):* na cloud, a credencial é um
    **PAT fine-grained read-only** que vive **só como env var na Vercel** — nunca em código, log, chat
-   ou KV. `ANTHROPIC_API_KEY` continua proibida (IA só via **AI Gateway**/OIDC).
+   ou KV. Na cloud, a IA usa **Amazon Bedrock Mantle/Kimi** em produção e pode usar **AI Gateway**
+   no preview; todas as credenciais vivem somente em variáveis de ambiente da Vercel.
    *Emenda (2026-07-27, Bedrock):* na desktop, a IA pode usar **Amazon Bedrock** — a credencial
    (`AWS_BEARER_TOKEN_BEDROCK` ou par IAM) vive **só em `backend/.env`**, que o `.gitignore` cobre.
    Nunca em código, log, chat ou `settings.json`. `ANTHROPIC_API_KEY` segue proibida.

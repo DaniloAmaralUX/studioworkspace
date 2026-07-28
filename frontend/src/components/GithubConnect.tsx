@@ -1,19 +1,16 @@
-import { LogOut } from 'lucide-react'
 import { GithubIcon } from '@/components/GithubIcon'
-import { API_BASE, IS_CLOUD } from '@/lib/api'
-import { useGithubStatus, useGithubLogout } from '@/hooks/useProjects'
+import { IS_CLOUD } from '@/lib/api'
+import { useGithubStatus } from '@/hooks/useProjects'
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-/** Rodapé da sidebar: estado da conexão GitHub + entrar/sair (cloud usa OAuth). */
+/** Rodapé passivo: cloud usa o PAT read-only configurado apenas no servidor. */
 export function GithubConnect() {
   const { data: status, isLoading } = useGithubStatus()
-  const logout = useGithubLogout()
 
-  // Conectado: mostra o login (quando conhecido) e permite sair se veio de OAuth.
   if (status?.authed) {
     const label = status.login ? `@${status.login}` : 'GitHub conectado'
     return (
@@ -23,55 +20,33 @@ export function GithubConnect() {
             <GithubIcon />
             <span className="truncate">{label}</span>
           </SidebarMenuButton>
-          {status.via === 'oauth' && (
-            <SidebarMenuButton
-              size="sm"
-              tooltip="Sair do GitHub"
-              onClick={() => logout.mutate()}
-              disabled={logout.isPending}
-              className="text-muted-foreground"
-            >
-              <LogOut />
-              <span>Sair</span>
-            </SidebarMenuButton>
-          )}
         </SidebarMenuItem>
       </SidebarMenu>
     )
   }
 
-  // Não conectado, na nuvem, com OAuth disponível: link de login (página inteira).
-  if (IS_CLOUD && status?.oauthAvailable) {
-    return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="Entrar com GitHub">
-            <a href={`${API_BASE}/auth/login`}>
-              <GithubIcon />
-              <span>Entrar com GitHub</span>
-            </a>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    )
-  }
+  const unavailableLabel = IS_CLOUD
+    ? status?.error
+      ? 'GitHub indisponível'
+      : 'GitHub não configurado'
+    : 'GitHub desconectado'
+  const tooltip = isLoading
+    ? 'Checando GitHub…'
+    : IS_CLOUD
+      ? status?.error
+        ? 'Não foi possível validar a conexão do servidor'
+        : 'Configure GITHUB_TOKEN read-only na Vercel'
+      : 'GitHub via gh CLI (gh auth login)'
 
-  // Desktop (gh CLI) ou OAuth indisponível: dica passiva.
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton
           disabled
-          tooltip={
-            isLoading
-              ? 'Checando GitHub…'
-              : IS_CLOUD
-                ? 'OAuth não configurado na Vercel'
-                : 'GitHub via gh CLI (gh auth login)'
-          }
+          tooltip={tooltip}
         >
           <GithubIcon />
-          <span>{isLoading ? 'GitHub…' : 'GitHub desconectado'}</span>
+          <span>{isLoading ? 'GitHub…' : unavailableLabel}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>

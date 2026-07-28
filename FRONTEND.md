@@ -114,7 +114,33 @@ Todas as mutations invalidam a query `['projects']` (React Query) para o hub ref
 - Nada de dashboard cheio de métrica decorativa. Densidade confortável por padrão.
 - Atalho de teclado para busca (`/` ou `Ctrl+K`) para "achar rápido".
 
+## Context Project
+
+- O cabeçalho alterna entre **Conversa geral** e projetos com fonte GitHub.
+- Trocar de projeto com conversa iniciada exige confirmação, cancela a requisição ativa e limpa o
+  histórico efêmero; `Enter` envia e `Shift+Enter` quebra linha.
+- Respostas contextuais mostram projeto, horário da consulta, estado completo/parcial, avisos, fontes
+  recolhíveis e uma próxima ação que só é salva por clique explícito.
+
+## Login do Studio Cloud
+
+- `/login` é uma tela cloud-only com senha única para o workspace pessoal.
+- Após autenticar, o servidor grava uma sessão segura de sete dias em cookie `HttpOnly`; o frontend
+  nunca recebe nem persiste o segredo de assinatura.
+- A sidebar oferece **Sair do Studio**, que expira a sessão e volta para `/login`.
+- O parâmetro `next` aceita somente caminhos internos iniciados por `/`, evitando redirecionamento
+  para domínios externos.
+- A conexão GitHub na sidebar é um indicador passivo. Na cloud não há botão de entrar/sair do GitHub:
+  o PAT read-only vive somente em `GITHUB_TOKEN` no servidor.
+
 ## Tema
 
 - shadcn com CSS variables; suportar claro/escuro (o app segue o tema do SO por padrão).
 - Tokens próprios do app em `index.css` (ver DESIGN.md → "Foundation do próprio Project Studio").
+
+## Auditoria de dependências
+
+A exceção temporária do `npm audit` para o advisory RSC do React Router está
+registrada em [`docs/plans/r0-cloud-hardening.md`](./docs/plans/r0-cloud-hardening.md).
+Ela só é aceitável enquanto esta aplicação continuar sendo uma SPA Vite sem
+RSC, SSR ou Server Actions.

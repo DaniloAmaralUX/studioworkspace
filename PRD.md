@@ -48,9 +48,11 @@ na primeira versão.
 
 ## 5. Princípios de produto
 
-1. **Local-first.** Tudo roda na máquina, servindo apenas em `127.0.0.1`. Dados pessoais ficam locais.
-2. **Nunca guardar tokens.** O app usa CLIs já instalados e autenticados (`gh` para GitHub). Não copia
-   nem armazena credenciais.
+1. **Local-first no desktop.** A variante desktop roda apenas em `127.0.0.1`. A variante cloud é um
+   cockpit pessoal separado, protegido pelo login próprio do Studio.
+2. **Nunca guardar tokens em dados do produto.** No desktop, GitHub usa o `gh` já autenticado. Na
+   cloud, o único token aceito é um PAT fine-grained read-only em `GITHUB_TOKEN`, mantido somente como
+   variável de ambiente da Vercel — nunca em cookie, KV, resposta, prompt ou log.
 3. **Não mover os arquivos do usuário.** Associar uma pasta ≠ copiar/mover. Remover associação ≠ apagar.
 4. **Próxima ação sempre visível.** Cada projeto mantém uma próxima ação concreta e editável.
 5. **Uma decisão por vez.** Poucas escolhas, defaults recomendados, linguagem clara (foco anti-TDAH).
@@ -125,11 +127,14 @@ Persistência: índice global `projects.json`; dentro de cada projeto **local**,
 - **RF-09 — Configurador de foundation:** escolher framework/tema/cor/fonte/radius/densidade/ícones com
   **preview real**; salvar `foundation.json`; gerar `DESIGN.md`; gerar comando `shadcn`; aplicar
   theme-only / fonts-only; mostrar o comando antes de aplicar.
+- **RF-10 — Context Project cloud:** selecionar um projeto GitHub, consultar metadados, README e até
+  12 commits no momento da pergunta, responder com fontes e permitir salvar explicitamente a próxima
+  ação sugerida.
 
 ## 9. Requisitos não funcionais
 
-- **Segurança:** servir só em `127.0.0.1`; nunca guardar tokens; confirmar clonar/abrir; nada destrutivo
-  sem confirmação; sem push/deploy/instalação automáticos.
+- **Segurança:** desktop somente em `127.0.0.1`; cloud protegida pelo login próprio do Studio; nunca
+  guardar tokens; APIs privadas sem cache; confirmar clonar/abrir; nada destrutivo sem confirmação.
 - **Desempenho:** hub abre em ≤ 2s com até ~50 projetos; leitura de pasta sem varredura profunda; cache
   de metadados do GitHub.
 - **Confiabilidade:** estado sobrevive a reiniciar; escrita atômica de `projects.json`/`.workspace`.
@@ -142,9 +147,9 @@ Agente embutido/streaming, agentes em paralelo, colaboração/multiusuário, syn
 marketplace, canvas estilo Figma, empacotamento desktop, importar automaticamente **todos** os repos
 (o usuário escolhe quais entram), dezenas de templates.
 
-> **Emenda (2026-07-24, [`PLANO2.md`](./PLANO2.md)):** para a variante **Studio Cloud**, "sync em
-> nuvem" (persistência em KV na Vercel) e **IA via AI Gateway** deixam de estar fora do escopo.
-> O restante desta lista permanece fora de escopo nas duas variantes.
+> **Emenda (atualizada em 2026-07-28, [`PLANO2.md`](./PLANO2.md)):** para a variante **Studio Cloud**,
+> persistência em KV, IA e o Context Project fundamentado em GitHub foram autorizados como uma linha
+> isolada. O restante desta lista permanece fora de escopo nas duas variantes.
 
 ## 11. Métrica principal
 

@@ -92,13 +92,22 @@ Todas as respostas são JSON. Erros retornam `{ error: { code, message } }` com 
   - grava no índice **e** no `.workspace/project.json` (se for local).
 - `DELETE /api/projects/:id` → `{ ok: true }` — remove do índice; **não** apaga a pasta/repo nem o clone.
 
-### GitHub
+### GitHub — desktop
 - `GET /api/github/status` → `{ authenticated: true, login: "DaniloAmaralUX" }` (via `gh auth status`).
 - `GET /api/github/repos?query=&limit=100` → lista dos meus repos:
   ```
   gh repo list --json nameWithOwner,description,primaryLanguage,pushedAt,url,isPrivate,repositoryTopics --limit 100
   ```
   → `{ nameWithOwner, description, language, pushedAt, url, isPrivate, topics }[]`.
+
+### GitHub — cloud
+
+- `GET /api/github/status` → `{ authed, via: 'pat' | null, login?, error? }`.
+- `GET /api/github/repos` usa somente o PAT fine-grained read-only em `GITHUB_TOKEN`.
+- OAuth, callbacks e cookies de token GitHub não existem. A sidebar é apenas um indicador de estado.
+- O token nunca é aceito do request nem devolvido, persistido no KV, incluído em prompt ou logado.
+- Chamadas ao GitHub têm timeout e erros estáveis: `github_not_configured`, `github_auth_failed`,
+  `github_rate_limited`, `github_timeout` e `github_failed`.
 
 ### Abrir / clonar
 - `POST /api/projects/:id/open` — body `{ with: 'explorer'|'terminal'|'claude'|'code'|'cursor' }`
@@ -130,6 +139,40 @@ Todas as respostas são JSON. Erros retornam `{ error: { code, message } }` com 
     Gateway** (`AI_GATEWAY_API_KEY` / `VERCEL_OIDC_TOKEN`). `ANTHROPIC_API_KEY` nunca é usada.
   - Modelo trocável por `PS_AI_MODEL`. Chamada só acontece por clique explícito do usuário —
     não há chamada de IA automática ou em background.
+
+### Configuração local de IA
+- `GET /api/settings/ai` → status e metadados não secretos do Amazon Bedrock.
+- `PUT /api/settings/ai` — salva chave, região, Project ID e modelo somente em `backend/.env`.
+  A chave nunca é devolvida pela API, escrita no índice de projetos ou enviada à cloud.
+- `POST /api/settings/ai/test` — faz uma inferência mínima e explícita para validar chave, região,
+  projeto e acesso ao modelo.
+- Endpoint padrão: `https://bedrock-mantle.us-east-2.api.aws/v1`; modelo padrão:
+  `moonshotai.kimi-k2.5`.
+
+### Context Project (chat)
+- `POST /api/chat` — body `{ projectId?, messages: { role: 'user'|'assistant', content: string }[] }`.
+- Sem `projectId`, mantém o chat geral e não consulta o GitHub.
+- Com `projectId`, valida um projeto GitHub e monta um snapshot efêmero com metadados, README limitado
+  a 2.000 caracteres e até 12 commits; nenhum conteúdo do repo é salvo em KV.
+- Responde `{ message, model, context, suggestedNextAction }`; `context` inclui horário, estado
+  completo/parcial, avisos e fontes construídas pelo servidor.
+- Mantém no máximo 24 mensagens e um orçamento total de caracteres por chamada. README e commits são
+  tratados como dados não confiáveis, nunca como instruções.
+
+### Login do Studio Cloud
+- Este é o único gate de autenticação do workspace. As antigas rotas OAuth GitHub foram removidas.
+- `middleware.ts` protege páginas e APIs na Vercel. Sem sessão, páginas redirecionam para `/login` e
+  APIs respondem `401 studio_auth_required`.
+- `GET /api/auth/studio-status` informa apenas se o login está configurado e se a sessão é válida.
+- `POST /api/auth/studio-login` valida `{ password }`, cria cookie
+  `__Host-studio_session` (`HttpOnly`, `Secure`, `SameSite=Strict`) e limita falhas a cinco tentativas
+  por quinze minutos via KV.
+- `POST /api/auth/studio-logout` expira o cookie imediatamente.
+- A Vercel recebe somente `STUDIO_ACCESS_PASSWORD_HASH` (PBKDF2-SHA256) e
+  `STUDIO_SESSION_SECRET`; a senha em texto puro nunca entra no repositório, KV ou logs.
+- Toda resposta `/api/*` envia `Cache-Control: private, no-store, max-age=0`,
+  `CDN-Cache-Control: no-store` e `Vercel-CDN-Cache-Control: no-store`.
+- Erros 500 usam mensagem pública genérica; detalhes de exceção e credenciais não entram na resposta.
 
 ## Detecção de stack (`stackDetect.ts`)
 

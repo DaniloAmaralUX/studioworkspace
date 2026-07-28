@@ -3,14 +3,20 @@
   "private": true,
   "type": "module",
   "description": "Dependências das funções serverless do Studio Cloud (api/ na raiz). O SPA vive em frontend/, o serviço desktop em backend/.",
+  "scripts": {
+    "typecheck": "tsc -p api/tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.cloud.config.ts"
+  },
   "dependencies": {
     "@upstash/redis": "^1.38.0",
+    "@vercel/functions": "^3.7.6",
     "ai": "^7.0.37",
+    "openai": "^6.49.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
-    "@vercel/node": "^5.8.27",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   }
 }

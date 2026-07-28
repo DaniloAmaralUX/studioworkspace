@@ -57,6 +57,41 @@ export type Template = {
   createdAt: string
 }
 
+export type ChatMessage = {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export type ChatRequest = {
+  projectId?: string
+  messages: ChatMessage[]
+}
+
+export type ContextSource = {
+  id: string
+  kind: 'repository' | 'readme' | 'commit'
+  label: string
+  url?: string
+  occurredAt?: string
+}
+
+export type ChatContext = {
+  projectId: string
+  projectName: string
+  repository?: string
+  fetchedAt: string
+  status: 'complete' | 'partial'
+  warnings: string[]
+  sources: ContextSource[]
+}
+
+export type ChatResponse = {
+  message: ChatMessage
+  model: string
+  context: ChatContext | null
+  suggestedNextAction: string | null
+}
+
 // ── Modo Maestri (canvas de orquestração — branch canvas, desktop-only) ──
 // A união completa entra de uma vez para não mexer no shared a cada fatia.
 

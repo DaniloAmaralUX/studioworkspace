@@ -17,6 +17,8 @@ import { aiRoutes } from './routes/ai'
 import { stampRoutes } from './routes/stamp'
 import { scaffoldRoutes } from './routes/scaffold'
 import { canvasRoutes } from './routes/canvas'
+import { settingsRoutes } from './routes/settings'
+import { chatRoutes } from './routes/chat'
 
 /** Monta o app completo sem dar listen — usado pelo server, pelos testes (inject)
  *  e pelo app Electron (serveStatic serve o frontend buildado na mesma origem). */
@@ -63,6 +65,8 @@ export async function buildApp({
   await app.register(stampRoutes)
   await app.register(scaffoldRoutes)
   await app.register(canvasRoutes)
+  await app.register(settingsRoutes)
+  await app.register(chatRoutes)
 
   // App empacotado (Electron): serve o frontend buildado na MESMA origem da API
   // (127.0.0.1:5178), evitando CORS. Fallback SPA para rotas do client-router.

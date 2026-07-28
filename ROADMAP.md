@@ -62,6 +62,30 @@ Painel estilo `shadcn/create` com preview real; salva `foundation.json`, gera `D
 
 ---
 
+## Linha cloud — Context Project
+
+Linha isolada da variante desktop, autorizada em 2026-07-28. O objetivo da primeira entrega é
+responder “qual é o estado deste projeto e o que faço agora?” usando evidências atuais do GitHub.
+
+### R0 — Base segura e reproduzível
+
+- [x] Login próprio do Studio é o único gate da aplicação.
+- [x] GitHub usa somente `GITHUB_TOKEN` read-only no servidor; OAuth e cookies de token foram removidos.
+- [x] APIs privadas usam `Cache-Control: no-store` e erros internos não vazam detalhes.
+- [x] Sidebar mostra a conexão GitHub como estado passivo, sem entrar/sair.
+- [ ] Gates integrados da branch cloud aprovados.
+
+### R1 — Projeto selecionado + contexto fundamentado
+
+- [~] Selecionar conversa geral ou um projeto GitHub no cabeçalho do chat.
+- [~] Consultar metadados, README e até 12 commits a cada mensagem, sem persistir o conteúdo.
+- [~] Mostrar atualização, estado completo/parcial, avisos e links das fontes.
+- [~] Gerar resposta e próxima ação na mesma chamada; salvar somente por confirmação.
+
+R2 (issues, PRs e checks), memória e automações ficam congelados até R1 ser validado no uso diário.
+
+---
+
 ## Depois do MVP (não fazer agora)
 Agente embutido (`AgentAdapter`: `detect/run/resume/cancel` + streaming) quando/se o CLI ficar acessível;
 detalhe de projeto; múltiplas contas GitHub; empacotamento desktop (Tauri/Electron); presets de foundation

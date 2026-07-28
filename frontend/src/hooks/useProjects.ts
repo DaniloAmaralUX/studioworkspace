@@ -24,17 +24,6 @@ export function useGithubStatus() {
   })
 }
 
-export function useGithubLogout() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: api.githubLogout,
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['github-status'] })
-      void qc.invalidateQueries({ queryKey: ['github-repos'] })
-    },
-  })
-}
-
 export function usePatchProject() {
   const qc = useQueryClient()
   return useMutation({

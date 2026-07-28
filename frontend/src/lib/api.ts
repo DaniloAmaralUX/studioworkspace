@@ -1,10 +1,11 @@
 import type {
   CanvasDoc,
+  ChatRequest,
+  ChatResponse,
   Foundation,
   Launchers,
   LauncherKind,
   Project,
-  ProjectStatus,
 } from './types'
 
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:5178/api'
@@ -21,6 +22,7 @@ export const WS_BASE = BASE.replace(/^http/, 'ws')
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
+    credentials: 'same-origin',
     headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
   })
   if (!res.ok) {
@@ -76,15 +78,37 @@ export type FoundationResponse = {
 export type GithubStatus = {
   authed: boolean
   login?: string
-  via?: 'oauth' | 'pat' | null
-  oauthAvailable?: boolean
+  via?: 'pat' | null
   error?: string
+}
+
+export type AiSettings = {
+  configured: boolean
+  provider: 'amazon-bedrock'
+  region: string
+  baseUrl: string
+  projectId: string | null
+  model: string
+  storage: 'backend/.env'
+}
+
+export type StudioAuthStatus = {
+  configured: boolean
+  authenticated: boolean
 }
 
 export const api = {
   health: () => req<{ ok: boolean }>('/health'),
+  studioAuthStatus: () =>
+    req<StudioAuthStatus>('/auth/studio-status'),
+  studioLogin: (password: string) =>
+    req<{ ok: true }>('/auth/studio-login', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }),
+  studioLogout: () =>
+    req<{ ok: true }>('/auth/studio-logout', { method: 'POST' }),
   githubStatus: () => req<GithubStatus>('/github/status'),
-  githubLogout: () => req<{ ok: true }>('/auth/logout', { method: 'POST' }),
   listProjects: () => req<Project[]>('/projects'),
   patchProject: (id: string, patch: ProjectPatch) =>
     req<Project>(`/projects/${id}`, {
@@ -132,6 +156,27 @@ export const api = {
     req<{ suggestion: string }>(`/projects/${id}/ai-next-action`, {
       method: 'POST',
     }),
+  getAiSettings: () => req<AiSettings>('/settings/ai'),
+  saveAiSettings: (input: {
+    apiKey?: string
+    region: string
+    projectId?: string
+    model: string
+  }) =>
+    req<AiSettings>('/settings/ai', {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    }),
+  testAiSettings: () =>
+    req<{ ok: true; model: string }>('/settings/ai/test', {
+      method: 'POST',
+    }),
+  chat: (input: ChatRequest, signal?: AbortSignal) =>
+    req<ChatResponse>('/chat', {
+      method: 'POST',
+      body: JSON.stringify(input),
+      signal,
+    }),
   stampProject: (id: string) =>
     req<StampResult>(`/projects/${id}/stamp`, { method: 'POST' }),
   scaffoldProject: (input: {
@@ -176,4 +221,11 @@ export type StampResult = {
   files: { file: string; action: StampAction }[]
 }
 
-export type { ProjectStatus }
+export type {
+  ChatContext,
+  ChatMessage,
+  ChatRequest,
+  ChatResponse,
+  ContextSource,
+  ProjectStatus,
+} from './types'
