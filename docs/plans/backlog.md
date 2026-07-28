@@ -9,8 +9,14 @@ Só saem daqui quando o core estiver validado pelo uso diário.
   exploração visual; canvas infinito, editor visual e Figma saíram do escopo. O código continua no
   repositório como histórico, sem rota e sem backlog ativo.
 
+## Em andamento
+- **Aba Design System (DS-1..DS-7)** — descongelada em 2026-07-28 por decisão explícita do usuário.
+  Metade A: galeria dos componentes instalados (DS-1 rota + catálogo, DS-2 preview vivo, DS-3 demos
+  interativos, DS-4 categorias + busca). Metade B: registry `@studio` de componentes (DS-5 registry
+  público + host único, DS-6 `registry:ui` com `files[]`), fechando a promessa do scaffold. DS-7
+  (Shiki) é polish opcional. Plano: `~/.claude/plans/fa-a-isso-por-mim-logical-lecun.md`.
+
 ## Congeladas (já existentes, aguardando validação do core)
-- Aba Design System (plano DS-1..DS-8 fechado, não iniciado)
 - Instalador NSIS do app Electron
 - Expansões do Studio Cloud
 - Novos temas no registry
