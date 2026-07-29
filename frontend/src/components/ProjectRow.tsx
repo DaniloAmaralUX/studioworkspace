@@ -36,7 +36,7 @@ export function ProjectRow({ project }: { project: Project }) {
         </div>
         {project.pathMissing ? (
           <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-destructive">
-            <FolderX className="size-3 shrink-0" />
+            <FolderX className="size-3 shrink-0" strokeWidth={1.5} />
             Pasta não encontrada no disco
           </p>
         ) : (
