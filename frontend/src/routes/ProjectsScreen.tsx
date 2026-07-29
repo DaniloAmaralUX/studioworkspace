@@ -68,8 +68,8 @@ export function ProjectsScreen() {
             {data ? `${data.length} ativos` : 'carregando…'}
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="relative min-w-0 flex-1 sm:flex-none">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               ref={searchRef}
@@ -77,7 +77,7 @@ export function ProjectsScreen() {
               onChange={(e) => setQ(e.target.value)}
               placeholder="Buscar (/ ou Ctrl+K)"
               aria-label="Buscar projetos por nome, tag, stack ou fonte"
-              className="w-56 pl-8"
+              className="w-full pl-8 sm:w-56"
             />
           </div>
           <Suspense
@@ -127,7 +127,15 @@ export function ProjectsScreen() {
         </Card>
       )}
 
-      {!isLoading && !isError && data && data.length === 0 && <EmptyState />}
+      {!isLoading && !isError && data && data.length === 0 && (
+        <EmptyState
+          action={
+            <Suspense fallback={null}>
+              <AddProjectDialog />
+            </Suspense>
+          }
+        />
+      )}
 
       {!isLoading && !isError && filtered.length > 0 && (
         <div className="overflow-hidden rounded-xl border bg-card">
@@ -138,9 +146,22 @@ export function ProjectsScreen() {
       )}
 
       {!isLoading && !isError && data && data.length > 0 && filtered.length === 0 && (
-        <p className="py-12 text-center text-sm text-muted-foreground">
-          Nenhum projeto casa com “{q}”.
-        </p>
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            Nenhum projeto casa com “{q}”. A busca cobre nome, tag, stack e
+            fonte.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setQ('')
+              searchRef.current?.focus()
+            }}
+          >
+            Limpar busca
+          </Button>
+        </div>
       )}
     </div>
   )

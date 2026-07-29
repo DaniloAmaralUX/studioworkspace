@@ -34,6 +34,16 @@
   --status-blocked: oklch(0.62 0.22 25);
   --status-done: oklch(0.68 0.16 155);
 
+  /* Papel "tinta": mesma cor usada como TEXTO sobre o tint claro da pilula.
+     Os valores acima servem ao ponto/preenchimento; como texto sobre um fundo
+     a 13% eles ficavam abaixo de APCA 60 / WCAG 3:1 no tema claro (building
+     2.44:1, done 2.37:1). Mesmo C e H, so o L desce ate o minimo medido. */
+  --status-planning-ink: oklch(0.575 0.02 286);
+  --status-building-ink: oklch(0.57 0.15 65);
+  --status-review-ink: oklch(0.555 0.16 250);
+  --status-blocked-ink: oklch(0.535 0.22 25);
+  --status-done-ink: oklch(0.53 0.16 155);
+
   --chart-1: oklch(0.55 0.2 280);
   --chart-2: oklch(0.62 0.16 250);
   --chart-3: oklch(0.68 0.16 155);
@@ -75,6 +85,13 @@
   --status-review: oklch(0.7 0.15 250);
   --status-blocked: oklch(0.7 0.18 22);
   --status-done: oklch(0.75 0.16 158);
+
+  /* No escuro o proprio token ja passa como texto sobre o tint (WCAG 5.2–7.0). */
+  --status-planning-ink: var(--status-planning);
+  --status-building-ink: var(--status-building);
+  --status-review-ink: var(--status-review);
+  --status-blocked-ink: var(--status-blocked);
+  --status-done-ink: var(--status-done);
 
   --chart-1: oklch(0.66 0.17 279);
   --chart-2: oklch(0.7 0.15 250);

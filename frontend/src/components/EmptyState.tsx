@@ -1,13 +1,17 @@
+import type { ReactNode } from 'react'
 import { FolderPlus } from 'lucide-react'
 
-export function EmptyState() {
+/** Estado vazio do hub: orienta e oferece a proxima acao (better-writing #11). */
+export function EmptyState({ action }: { action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[var(--radius)] border border-dashed border-[var(--border)] p-16 text-center">
-      <FolderPlus className="mb-3 size-8 text-[var(--muted-foreground)]" />
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border p-16 text-center">
+      <FolderPlus className="mb-3 size-8 text-muted-foreground" />
       <p className="text-sm font-medium">Nenhum projeto ainda</p>
-      <p className="mt-1 max-w-xs text-sm text-[var(--muted-foreground)]">
-        Adicionar pastas locais e repositórios do GitHub chega na Fatia 1.
+      <p className="mt-1 max-w-xs text-sm text-pretty text-muted-foreground">
+        O hub reúne suas pastas locais e repositórios do GitHub num lugar só,
+        com a próxima ação sempre à vista.
       </p>
+      {action && <div className="mt-4">{action}</div>}
     </div>
   )
 }
