@@ -92,7 +92,7 @@ export function NextActionInput({
           aria-label="Próxima ação"
         />
         <span
-          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]"
+          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
           role="status"
           aria-live="polite"
         >

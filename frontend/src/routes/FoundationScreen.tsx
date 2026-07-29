@@ -172,7 +172,7 @@ export function FoundationScreen() {
               </p>
               <div
                 style={previewStyle}
-                className="rounded-[var(--radius)] border bg-background p-5 text-foreground"
+                className="rounded-lg border bg-background p-5 text-foreground"
               >
                 <div className="mb-3 flex items-center justify-between">
                   <span className="font-semibold">Aa Preview</span>
@@ -206,6 +206,7 @@ export function FoundationScreen() {
                   size="icon"
                   variant="ghost"
                   className="size-7"
+                  aria-label="Copiar comando shadcn"
                   onClick={() => {
                     navigator.clipboard?.writeText(command)
                     setCopied(true)
