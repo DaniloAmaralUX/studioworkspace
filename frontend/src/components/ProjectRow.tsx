@@ -17,7 +17,10 @@ export function ProjectRow({ project }: { project: Project }) {
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="truncate text-sm font-medium tracking-tight">
+          <span
+            className="truncate text-sm font-medium tracking-tight"
+            title={project.name}
+          >
             {project.name}
           </span>
           <span className="flex shrink-0 gap-1">
@@ -38,7 +41,10 @@ export function ProjectRow({ project }: { project: Project }) {
           </p>
         ) : (
           project.nextAction && (
-            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+            <p
+              className="mt-0.5 truncate text-xs text-muted-foreground"
+              title={project.nextAction}
+            >
               {project.nextAction}
             </p>
           )
@@ -50,7 +56,7 @@ export function ProjectRow({ project }: { project: Project }) {
           {timeAgo(project.lastActivityAt)}
         </span>
       </div>
-      <ChevronRight className="size-4 shrink-0 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground/40 transition-[color,translate] duration-150 ease-out group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
     </Link>
   )
 }

@@ -53,7 +53,7 @@ export function StampButton({ id }: { id: string }) {
         <ul className="space-y-1 text-xs text-muted-foreground">
           {result.files.map((f) => (
             <li key={f.file} className="flex items-center gap-1.5">
-              <Check className="size-3 shrink-0 text-emerald-500" />
+              <Check className="size-3 shrink-0 text-status-done" />
               <span className="font-mono tabular-nums">{f.file}</span>
               <span className="text-[0.7rem] uppercase tracking-wide opacity-70">
                 {ACTION_PT[f.action]}

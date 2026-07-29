@@ -169,7 +169,14 @@ export function ProjectDetail() {
               Studio desbloqueia sozinho na próxima atualização. Nada foi
               apagado do hub.
             </p>
-            <p className="mt-1 truncate font-mono text-xs text-muted-foreground">
+            <p
+              className="mt-1 truncate font-mono text-xs text-muted-foreground"
+              title={
+                project.source.kind === 'local'
+                  ? project.source.path
+                  : project.source.cloneDir
+              }
+            >
               {project.source.kind === 'local'
                 ? project.source.path
                 : project.source.cloneDir}

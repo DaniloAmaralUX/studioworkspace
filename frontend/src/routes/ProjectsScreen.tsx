@@ -111,8 +111,8 @@ export function ProjectsScreen() {
       )}
 
       {isError && (
-        <Card className="flex items-center gap-3 border-red-500/30 p-4 text-sm">
-          <AlertTriangle className="size-5 text-red-500" />
+        <Card className="flex items-center gap-3 border-destructive/30 bg-destructive/5 p-4 text-sm">
+          <AlertTriangle className="size-5 shrink-0 text-destructive" />
           <div className="flex-1">
             <p className="font-medium">Workspace Service não respondeu.</p>
             <p className="text-muted-foreground">

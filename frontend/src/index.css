@@ -155,10 +155,16 @@
     font-feature-settings: "cv11", "ss01";
     letter-spacing: -0.006em;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
   /* Titulos nao quebram feio (widows/orphans). */
   h1, h2, h3 { text-wrap: balance; }
+  /* Sublinhado com as metricas da propria fonte (nao a do browser). */
+  a {
+    text-underline-position: from-font;
+    text-decoration-thickness: from-font;
+  }
   /* Numeros tecnicos alinhados (tokens, versoes, tempos) */
   .tnum { font-variant-numeric: tabular-nums; }
 }

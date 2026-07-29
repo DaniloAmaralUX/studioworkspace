@@ -180,7 +180,7 @@ export function ThemesScreen() {
               onClick={() => apply(preset)}
               aria-pressed={isActive}
               className={cn(
-                'group flex flex-col gap-2.5 rounded-xl border bg-card p-2.5 text-left transition-all hover:-translate-y-0.5 hover:border-muted-foreground/40',
+                'group flex flex-col gap-2.5 rounded-xl border bg-card p-2.5 text-left transition-[translate,border-color] duration-150 ease-out hover:-translate-y-0.5 hover:border-muted-foreground/40',
                 isActive && 'border-primary/50 ring-2 ring-primary/25',
               )}
             >

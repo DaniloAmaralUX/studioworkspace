@@ -104,7 +104,7 @@ export function NextActionInput({
           )}
           {state === 'saved' && (
             <>
-              <Check className="size-4 text-emerald-500" aria-hidden />
+              <Check className="size-4 text-status-done" aria-hidden />
               <span className="sr-only">Salvo</span>
             </>
           )}
