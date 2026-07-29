@@ -113,6 +113,15 @@
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 
+  /* Curvas de motion (Emil Kowalski). As embutidas do CSS sao fracas demais
+     para movimento deliberado. Sobrescrever --ease-out/--ease-in-out aqui faz
+     todo `ease-out`/`ease-in-out` do app (e das keyframes do tw-animate-css,
+     que leem --tw-ease) usar a curva forte, sem tocar componente por componente.
+     entrando/saindo -> ease-out · morph na tela -> ease-in-out · gaveta -> ease-drawer */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
   --radius-xs: calc(var(--radius) * 0.5);
   --radius-sm: calc(var(--radius) * 0.75);
   --radius-md: calc(var(--radius) * 0.875);
