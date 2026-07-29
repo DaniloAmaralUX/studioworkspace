@@ -57,11 +57,26 @@ export function CopyButton({
       aria-label={label}
       onClick={copy}
     >
-      {copied ? (
-        <Check className="size-3.5" aria-hidden="true" />
-      ) : (
-        <Copy className="size-3.5" aria-hidden="true" />
-      )}
+      {/* Cross-fade contextual (better-ui): ambos os icones no DOM,
+          scale 0.25→1 + opacity + blur, cubic-bezier(0.2,0,0,1). */}
+      <span className="relative" aria-hidden="true">
+        <Check
+          className={cn(
+            'absolute inset-0 size-3.5 transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
+            copied
+              ? 'scale-100 opacity-100 blur-0'
+              : 'scale-[0.25] opacity-0 blur-[4px]',
+          )}
+        />
+        <Copy
+          className={cn(
+            'size-3.5 transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
+            copied
+              ? 'scale-[0.25] opacity-0 blur-[4px]'
+              : 'scale-100 opacity-100 blur-0',
+          )}
+        />
+      </span>
       {copied ? 'Copiado' : 'Copiar'}
     </Button>
   )

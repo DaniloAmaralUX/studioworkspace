@@ -165,11 +165,23 @@ export function SettingsScreen() {
                   onClick={() => setShowKey((visible) => !visible)}
                   aria-label={showKey ? 'Ocultar chave' : 'Mostrar chave'}
                 >
-                  {showKey ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
+                  {/* Cross-fade contextual (better-ui): ambos no DOM. */}
+                  <span className="relative" aria-hidden="true">
+                    <EyeOff
+                      className={
+                        showKey
+                          ? 'absolute inset-0 size-4 scale-100 opacity-100 blur-0 transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)]'
+                          : 'absolute inset-0 size-4 scale-[0.25] opacity-0 blur-[4px] transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)]'
+                      }
+                    />
+                    <Eye
+                      className={
+                        showKey
+                          ? 'size-4 scale-[0.25] opacity-0 blur-[4px] transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)]'
+                          : 'size-4 scale-100 opacity-100 blur-0 transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)]'
+                      }
+                    />
+                  </span>
                 </Button>
               </div>
             </div>

@@ -1,14 +1,26 @@
 import { useState, type FormEvent } from 'react'
-import { Plus, Trash2, ExternalLink, Loader2 } from 'lucide-react'
+import { Plus, Trash2, ExternalLink, Loader2, TriangleAlert } from 'lucide-react'
 import {
   useAddTemplate,
   useRemoveTemplate,
   useTemplates,
 } from '@/hooks/useProjects'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useDocumentTitle } from '@/lib/useDocumentTitle'
+import type { Template } from '@/lib/types'
 
 export function TemplatesScreen() {
   useDocumentTitle('Templates')
@@ -17,6 +29,7 @@ export function TemplatesScreen() {
   const remove = useRemoveTemplate()
   const [name, setName] = useState('')
   const [repoUrl, setRepoUrl] = useState('')
+  const [toRemove, setToRemove] = useState<Template | null>(null)
 
   function submit(e: FormEvent) {
     e.preventDefault()
@@ -78,9 +91,11 @@ export function TemplatesScreen() {
         </Button>
       </form>
       {add.isError && (
-        <p className="mb-4 text-sm text-destructive">
-          {(add.error as Error).message}
-        </p>
+        <Alert variant="destructive" className="mb-4">
+          <TriangleAlert aria-hidden="true" />
+          <AlertTitle>Não foi possível adicionar</AlertTitle>
+          <AlertDescription>{(add.error as Error).message}</AlertDescription>
+        </Alert>
       )}
 
       {list.length === 0 ? (
@@ -95,8 +110,13 @@ export function TemplatesScreen() {
               className="flex items-center justify-between gap-3 p-3"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{t.name}</p>
-                <p className="truncate text-xs text-muted-foreground">
+                <p className="truncate text-sm font-medium" title={t.name}>
+                  {t.name}
+                </p>
+                <p
+                  className="truncate text-xs text-muted-foreground"
+                  title={t.repoUrl}
+                >
                   {t.repoUrl}
                 </p>
               </div>
@@ -106,27 +126,64 @@ export function TemplatesScreen() {
                   variant="ghost"
                   size="icon"
                   className="size-8"
-                  title="Abrir no navegador"
+                  title={`Abrir ${t.name} no navegador`}
                 >
-                  <a href={t.repoUrl} target="_blank" rel="noreferrer">
-                    <ExternalLink className="size-4" />
+                  <a
+                    href={t.repoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`Abrir ${t.name} no navegador`}
+                  >
+                    <ExternalLink className="size-4" aria-hidden="true" />
                   </a>
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="size-8 text-destructive"
-                  title="Remover"
+                  title={`Remover ${t.name}`}
+                  aria-label={`Remover ${t.name}`}
                   disabled={remove.isPending}
-                  onClick={() => remove.mutate(t.id)}
+                  onClick={() => setToRemove(t)}
                 >
-                  <Trash2 className="size-4" />
+                  <Trash2 className="size-4" aria-hidden="true" />
                 </Button>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <AlertDialog
+        open={toRemove !== null}
+        onOpenChange={(open) => {
+          if (!open) setToRemove(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Remover “{toRemove?.name}” dos templates?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Isso só tira o template da sua lista. O repositório no GitHub
+              continua intacto.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              onClick={() => {
+                if (toRemove) remove.mutate(toRemove.id)
+                setToRemove(null)
+              }}
+            >
+              Remover template
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

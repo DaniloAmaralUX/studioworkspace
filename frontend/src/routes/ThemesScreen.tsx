@@ -154,8 +154,13 @@ export function ThemesScreen() {
                 size="sm"
                 className="ml-auto h-6 shrink-0 px-2"
                 onClick={copyCmd}
+                aria-label="Copiar comando de aplicar tema"
               >
-                {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                {copied ? (
+                  <Check className="size-3.5" aria-hidden="true" />
+                ) : (
+                  <Copy className="size-3.5" aria-hidden="true" />
+                )}
               </Button>
             </div>
           ) : (

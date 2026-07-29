@@ -58,7 +58,13 @@ export function LoginScreen() {
 
   async function submit(event: FormEvent) {
     event.preventDefault()
-    if (!password || submitting || !configured) return
+    if (submitting || !configured) return
+    // Submit fica habilitado e a validacao acontece aqui (better-accessibility
+    // #7): campo vazio devolve o foco em vez de esconder o botao.
+    if (!password) {
+      document.getElementById('studio-password')?.focus()
+      return
+    }
     setSubmitting(true)
     try {
       await api.studioLogin(password)
@@ -121,11 +127,7 @@ export function LoginScreen() {
                   />
                 </div>
               </div>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={!password || submitting}
-              >
+              <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? (
                   <LoaderCircle className="size-4 animate-spin" />
                 ) : (
